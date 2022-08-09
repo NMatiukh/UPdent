@@ -1,112 +1,99 @@
 import {Button, Form, Input, InputNumber, Row, Select, Space} from "antd";
 import {MinusCircleOutlined, PlusOutlined} from "@ant-design/icons";
-import {useDispatch} from "react-redux";
-import {getPriceList, test} from "../../redux/actions";
+import {useDispatch, useSelector} from "react-redux";
+import {getPriceList, putPriceList} from "../../redux/actions";
+import {useEffect, useState} from "react";
+import TextArea from "antd/es/input/TextArea";
 
-const areas = [
-    {
-        label: 'Beijing',
-        value: 'Beijing',
-    },
-    {
-        label: 'Shanghai',
-        value: 'Shanghai',
-    },
-];
-
+const {Option} = Select;
 
 export default function PriceList() {
     const [form] = Form.useForm();
     const dispatch = useDispatch();
-
-    const handleChange = () => {
-        form.setFieldsValue({
-            sights: [],
-        });
-    };
-
+    const priceList = useSelector(state => state.priceList.priceList)
+    useEffect(() => {
+        dispatch(getPriceList())
+    }, [dispatch])
 
     const onFinish = (values) => {
-        dispatch(test(values));
+        dispatch(putPriceList({...priceList.filter(item => item.title === form.getFieldValue('title'))[0], ...values}))
+    };
+    const handleChange = () => {
+        form.setFieldsValue({
+            details: priceList.filter(item => item.title === form.getFieldValue('title'))[0].details,
+        });
     };
     return (
         <div>
             <Form
                 form={form}
-                name="addDetailsToPriceList"
+                name={"editPriceListForTitle"}
                 onFinish={onFinish}
-                autoComplete="off"
-                labelCol={{span: 2}}
-                wrapperCol={{span: 4}}
+                initialValues={priceList}
             >
                 <Form.Item
-                    name="title"
+                    name={"title"}
                     label="Заголовок"
-                    rules={[
-                        {
-                            required: true,
-                            message: 'Missing title',
-                        },
-                    ]}
+                    wrapperCol={{span: 4}}
                 >
-                    <Select options={areas} onChange={handleChange}/>
+                    <Select onChange={handleChange}>
+                        {
+                            priceList.map(item => {
+                                return (
+                                    <Option key={item.title} value={item.title}>{item.title}</Option>
+                                )
+                            })
+                        }
+                    </Select>
                 </Form.Item>
-                <Form.List name="subtitle">
-                    {(fields, {add, remove}) => (
-                        <>
-                            {fields.map((field) => (
-                                <Row key={field.key}>
-                                    <Form.Item
-                                        noStyle
-                                        shouldUpdate={(prevValues, curValues) =>
-                                            prevValues.area !== curValues.area || prevValues.subtitle !== curValues.subtitle
-                                        }
-                                    >
-                                        {() => (
-                                            <Form.Item
-                                                label="Підзагловок"
-                                                labelCol={{span: 12}}
-                                                wrapperCol={{span: 16}}
-                                                name={[field.name, 'subtitle']}
-                                                rules={[
-                                                    {
-                                                        required: true,
-                                                        message: 'Missing subtitle',
-                                                    },
-                                                ]}
+                <Form.List
+                    name={'details'}
+                >
+                    {(fields, {add, remove}) => {
+                        return (
+                            <>
+                                {fields.map((field, index) => (
+                                    <Row key={field.key} justify={"space-around"}>
+                                        <Form.Item
+                                            name={[index, "subtitle"]}
+                                            label="Підзаголовок"
+                                            rules={[{required: true}]}
+                                            style={{width: "50%"}}
+                                        >
+                                            <TextArea/>
+                                        </Form.Item>
+                                        <Form.Item
+                                            label="Ціна"
+                                            name={[index, "price"]}
+                                            rules={[{required: true}]}
+                                        >
+                                            <InputNumber/>
+                                        </Form.Item>
+                                        {fields.length > 1 ? (
+                                            <Button
+                                                type="danger"
+                                                shape={"round"}
+                                                className="dynamic-delete-button"
+                                                onClick={() => remove(field.name)}
+                                                // icon={<MinusCircleOutlined />}
                                             >
-                                                <Input
-                                                    disabled={!form.getFieldValue('title')}
-                                                >
-                                                </Input>
-                                            </Form.Item>
-                                        )}
-                                    </Form.Item>
-                                    <Form.Item
-                                        label="Ціна"
-                                        labelCol={{span: 12}}
-                                        wrapperCol={{span: 16}}
-                                        name={[field.name, 'price']}
-                                        rules={[
-                                            {
-                                                required: true,
-                                                message: 'Missing price',
-                                            },
-                                        ]}
+                                                Remove
+                                            </Button>
+                                        ) : null}
+                                    </Row>
+                                ))}
+                                <Form.Item>
+                                    <Button
+                                        type="dashed"
+                                        onClick={() => add()}
+                                        style={{width: "100%"}}
                                     >
-                                        <InputNumber addonAfter="грн" disabled={!form.getFieldValue('title')}/>
-                                    </Form.Item>
-                                    <MinusCircleOutlined onClick={() => remove(field.name)}/>
-                                </Row>
-                            ))}
-
-                            <Form.Item>
-                                <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined/>}>
-                                    Додати поля
-                                </Button>
-                            </Form.Item>
-                        </>
-                    )}
+                                        <PlusOutlined/> Add field
+                                    </Button>
+                                </Form.Item>
+                            </>
+                        );
+                    }}
                 </Form.List>
                 <Form.Item>
                     <Button type="primary" htmlType="submit">

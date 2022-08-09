@@ -169,21 +169,22 @@ export function getPriceList() {
             })
     }
 }
-export function test(test) {
+
+export function putPriceList(priceList) {
     return async dispatch => {
         message.loading('Loading...', 1);
         axios
             .request({
                 method: "PUT",
-                url: URL + "/priceList",
-                data: test
+                url: URL + '/priceList/' + priceList.id,
+                data: priceList
             })
-            .then(response => {
-                dispatch({type: CREATE_PRICE_LIST, payload: response.data});
-                message.success(`The created!`);
+            .then(() => {
+                dispatch({type: EDIT_PHOTO, payload: priceList})
+                message.success(`The photo "${priceList.title}" edited!`);
             })
             .catch(() => {
-                message.error('This photo not created!');
+                message.error('This photo not edited!');
             })
     }
 }

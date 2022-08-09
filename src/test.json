@@ -182,22 +182,45 @@
   ],
   "staff": [
   ],
-  "priceList": {
-    "diagnosis": [
-      {
-        "name": "Examination, CT, consultation, treatment plan, cost sheet",
-        "price": 1000
-      },
-      {
-        "name": "Examination, consultation, treatment plan, cost sheet",
-        "price": 500
-      }
-    ],
-    "hygiene": [
-      {
-        "name": "Professional oral hygiene",
-        "price": 1500
-      }
-    ]
-  }
+  "priceList": [
+    {
+      "title": "Діагностика",
+      "details": [
+        {
+          "subtitle": "Огляд, КТ, консультація, план лікування, кошторис",
+          "price": 1000
+        },
+        {
+          "subtitle": "Огляд, консультація, план лікування, кошторис",
+          "price": 500
+        },
+        {
+          "subtitle": "КТ",
+          "price": 600
+        }
+      ]
+    },
+    {
+      "title": "Гігієна",
+      "details": [
+        {
+          "subtitle": "Професійна гігієна ротової порожнини",
+          "price": 1500
+        }
+      ]
+    },
+    {
+      "title": "Естетична стоматологія",
+      "details": [
+        {
+          "subtitle": "Відбілення",
+          "price": 6000
+        },
+        {
+          "subtitle": "Цифровий вінір",
+          "price": 10000
+        }
+      ]
+    }
+  ]
 }

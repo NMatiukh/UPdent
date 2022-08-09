@@ -77,12 +77,12 @@ export default function Staff() {
                             title={i++ + ". " + (item.details.length === 1 ? item.details[0] : item.details[0] + " | " + item.details[1])}
                         />
                         {
-                            item.upload[0] ?
+                            item.upload === undefined || item.upload.length === 0 ?
+                                null :
                                 <Image
                                     width={100}
                                     src={item.upload[0].thumbUrl}
-                                /> :
-                                null
+                                />
                         }
                         <p>{item.firstName + " " + item.secondName}</p>
                         <p>{item.position}</p>
