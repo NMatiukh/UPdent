@@ -1,9 +1,10 @@
-import {Button, Form, Input, InputNumber, Row, Select, Space} from "antd";
-import {MinusCircleOutlined, PlusOutlined} from "@ant-design/icons";
+import {Button, Divider, Form, Input, InputNumber, Row, Select, Space} from "antd";
+import {MinusCircleFilled, MinusCircleOutlined, PlusOutlined} from "@ant-design/icons";
 import {useDispatch, useSelector} from "react-redux";
-import {getPriceList, putPriceList} from "../../redux/actions";
-import {useEffect, useState} from "react";
+import {createPriceList, deletePriceList, editPriceList, getPriceList, setPriceList} from "../../redux/actions";
+import {useEffect, useRef, useState} from "react";
 import TextArea from "antd/es/input/TextArea";
+import * as events from "events";
 
 const {Option} = Select;
 
@@ -11,41 +12,118 @@ export default function PriceList() {
     const [form] = Form.useForm();
     const dispatch = useDispatch();
     const priceList = useSelector(state => state.priceList.priceList)
+    const inputRef = useRef(null);
+    const [titleName, setTitleName] = useState('')
+    const [activeTitle, setActiveTitle] = useState('')
     useEffect(() => {
         dispatch(getPriceList())
     }, [dispatch])
-
+    const onTitleNameChange = (event) => {
+        setTitleName(event.target.value);
+    };
+    const addTitle = (e) => {
+        e.preventDefault();
+        dispatch(setPriceList({
+            "title": titleName,
+            "details": [{}]
+        }))
+        setTitleName('');
+        setTimeout(() => {
+            inputRef.current?.focus();
+        }, 0);
+    };
     const onFinish = (values) => {
-        dispatch(putPriceList({...priceList.filter(item => item.title === form.getFieldValue('title'))[0], ...values}))
+        if ({...priceList.filter(item => item.title === form.getFieldValue('title'))[0], ...values}.id === undefined) {
+            dispatch(createPriceList(values))
+        } else {
+            dispatch(editPriceList({...priceList.filter(item => item.title === form.getFieldValue('title'))[0], ...values}))
+        }
     };
     const handleChange = () => {
         form.setFieldsValue({
             details: priceList.filter(item => item.title === form.getFieldValue('title'))[0].details,
         });
+        setActiveTitle(form.getFieldValue('title'))
     };
+    const deletePriceListItem = () => {
+        form.setFieldValue('title', '')
+        setActiveTitle('')
+        form.setFieldsValue({
+            details: []
+        })
+        if (priceList.filter(item => item.title === activeTitle)[0].id) {
+            dispatch(deletePriceList(priceList.filter(item => item.title === activeTitle)[0]))
+        }
+    }
     return (
         <div>
             <Form
                 form={form}
                 name={"editPriceListForTitle"}
                 onFinish={onFinish}
-                initialValues={priceList}
             >
-                <Form.Item
-                    name={"title"}
-                    label="Заголовок"
-                    wrapperCol={{span: 4}}
-                >
-                    <Select onChange={handleChange}>
-                        {
-                            priceList.map(item => {
-                                return (
-                                    <Option key={item.title} value={item.title}>{item.title}</Option>
-                                )
-                            })
-                        }
-                    </Select>
-                </Form.Item>
+                <Row justify={"space-between"} style={{width: "60%"}}>
+                    <Form.Item
+                        name={"title"}
+                        label="Заголовок"
+                        rules={[{required: true}]}
+                    >
+                        <Select
+                            onChange={handleChange}
+                            style={{width: 300,}}
+                            dropdownRender={(menu) => (
+                                <>
+                                    {menu}
+                                    <Divider
+                                        style={{
+                                            margin: '8px 0',
+                                        }}
+                                    />
+                                    <Space
+                                        style={{
+                                            padding: '0 8px 4px',
+                                        }}
+                                    >
+                                        <Input
+                                            placeholder="Введіть заголовок"
+                                            value={titleName}
+                                            onChange={onTitleNameChange}
+                                            ref={inputRef}
+                                        />
+                                        <Button type="dashed" icon={<PlusOutlined/>} onClick={addTitle}>
+                                            Додати
+                                        </Button>
+                                    </Space>
+                                </>
+                            )}
+                        >
+                            {
+                                priceList.map(item => {
+                                    return (
+                                        <Option key={item.title} value={item.title}>{item.title} </Option>
+                                    )
+                                })
+                            }
+                        </Select>
+                    </Form.Item>
+                    {
+                        activeTitle && <>
+                            <Button
+                                onClick={() => true}
+                            >
+                                Редагувати
+                            </Button>
+                            <Button
+                                onClick={deletePriceListItem}
+                                danger
+                                type={"primary"}
+                            >
+                                Видалити
+                            </Button>
+                        </>
+                    }
+                </Row>
+
                 <Form.List
                     name={'details'}
                 >
@@ -57,38 +135,59 @@ export default function PriceList() {
                                         <Form.Item
                                             name={[index, "subtitle"]}
                                             label="Підзаголовок"
-                                            rules={[{required: true}]}
+                                            rules={
+                                                [
+                                                    {
+                                                        required: true,
+                                                        message: 'Введіть підзаголовок!'
+                                                    }
+                                                ]
+                                            }
                                             style={{width: "50%"}}
+
                                         >
-                                            <TextArea/>
+                                            <TextArea showCount maxLength={180} autoSize={{minRows: 4, maxRows: 8}}/>
                                         </Form.Item>
                                         <Form.Item
                                             label="Ціна"
                                             name={[index, "price"]}
-                                            rules={[{required: true}]}
+                                            rules={
+                                                [
+                                                    {
+                                                        required: true,
+                                                        message: 'Введіть ціну!'
+                                                    },
+                                                    {
+                                                        type: 'number',
+                                                        min: 0,
+                                                        message: 'Введіть ціну більшу 0!'
+                                                    },
+                                                ]
+                                            }
+                                            style={{width: "18%"}}
                                         >
-                                            <InputNumber/>
+                                            <InputNumber addonAfter={"грн"}/>
                                         </Form.Item>
                                         {fields.length > 1 ? (
                                             <Button
-                                                type="danger"
-                                                shape={"round"}
+                                                danger
+                                                type="dashed"
                                                 className="dynamic-delete-button"
                                                 onClick={() => remove(field.name)}
-                                                // icon={<MinusCircleOutlined />}
                                             >
-                                                Remove
+                                                Видалити поле
                                             </Button>
                                         ) : null}
                                     </Row>
                                 ))}
                                 <Form.Item>
                                     <Button
+                                        disabled={!form.getFieldValue('title')}
                                         type="dashed"
                                         onClick={() => add()}
                                         style={{width: "100%"}}
                                     >
-                                        <PlusOutlined/> Add field
+                                        <PlusOutlined/> Додати поле
                                     </Button>
                                 </Form.Item>
                             </>
