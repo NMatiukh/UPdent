@@ -2,6 +2,7 @@ import {Button, Checkbox, Form, Input, Row, Upload} from "antd";
 import {UploadOutlined} from "@ant-design/icons";
 import {useDispatch} from "react-redux";
 import {createStaff} from "../../redux/actions";
+import {upload} from "@testing-library/user-event/dist/upload";
 
 export default function AddStaff() {
     const [form] = Form.useForm();
@@ -11,6 +12,7 @@ export default function AddStaff() {
         form.resetFields();
     };
     const normFile = (e) => {
+        console.log(e)
         return e?.fileList;
     };
     return (
@@ -92,6 +94,7 @@ export default function AddStaff() {
                 >
                     <Upload
                         name="photo"
+                        action={'https://fake-server-app-nmatiukh.herokuapp.com/posts'}
                         accept="image/png, image/jpeg"
                         listType="picture"
                         maxCount

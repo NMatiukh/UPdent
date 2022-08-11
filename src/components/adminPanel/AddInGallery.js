@@ -76,6 +76,7 @@ export default function AddInGallery() {
 
                 <Form.Item
                     name="upload"
+                    action={'https://fake-server-app-nmatiukh.herokuapp.com/posts'}
                     valuePropName="fileList"
                     getValueFromEvent={normFile}
                     wrapperCol={{offset: 8, span: 8}}

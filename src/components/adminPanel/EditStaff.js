@@ -95,6 +95,7 @@ export default function EditStaff() {
                 >
                     <Upload
                         name="photo"
+                        action={'https://fake-server-app-nmatiukh.herokuapp.com/posts'}
                         accept="image/png, image/jpeg"
                         listType="picture"
                         maxCount

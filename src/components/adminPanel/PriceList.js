@@ -83,11 +83,18 @@ export default function PriceList() {
                     <Form.Item
                         name={"title"}
                         label="Заголовок"
-                        rules={[{required: true}]}
+                        rules={
+                            [
+                                {
+                                    required: true,
+                                    message: "Виберіть або створіть заголовок!"
+                                }
+                            ]
+                        }
                     >
                         {
                             changeTitleActive ?
-                                <Input/> :
+                                <Input style={{width: 300,}}/> :
                                 <Select
                                     onChange={handleChange}
                                     style={{width: 300,}}
