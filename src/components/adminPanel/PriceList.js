@@ -1,10 +1,16 @@
 import {Button, Divider, Form, Input, InputNumber, Row, Select, Space} from "antd";
-import {MinusCircleFilled, MinusCircleOutlined, PlusOutlined} from "@ant-design/icons";
+import {PlusOutlined} from "@ant-design/icons";
 import {useDispatch, useSelector} from "react-redux";
-import {createPriceList, deletePriceList, editPriceList, getPriceList, setPriceList} from "../../redux/actions";
+import {
+    changePriceListTitle,
+    createPriceList,
+    deletePriceList,
+    editPriceList,
+    getPriceList,
+    setPriceList
+} from "../../redux/actions";
 import {useEffect, useRef, useState} from "react";
 import TextArea from "antd/es/input/TextArea";
-import * as events from "events";
 
 const {Option} = Select;
 
@@ -15,6 +21,7 @@ export default function PriceList() {
     const inputRef = useRef(null);
     const [titleName, setTitleName] = useState('')
     const [activeTitle, setActiveTitle] = useState('')
+    const [changeTitleActive, setChangeTitleActive] = useState(false);
     useEffect(() => {
         dispatch(getPriceList())
     }, [dispatch])
@@ -55,6 +62,16 @@ export default function PriceList() {
             dispatch(deletePriceList(priceList.filter(item => item.title === activeTitle)[0]))
         }
     }
+    const showEditActiveTitle = () => {
+        setChangeTitleActive(true);
+    }
+    const confirmChangeActiveTitle = () => {
+        setChangeTitleActive(false);
+        let item = {...priceList.filter(item => item.title === activeTitle)[0]};
+        item.title = form.getFieldValue('title');
+        dispatch(changePriceListTitle(item))
+        setActiveTitle(form.getFieldValue('title'))
+    }
     return (
         <div>
             <Form
@@ -68,51 +85,63 @@ export default function PriceList() {
                         label="Заголовок"
                         rules={[{required: true}]}
                     >
-                        <Select
-                            onChange={handleChange}
-                            style={{width: 300,}}
-                            dropdownRender={(menu) => (
-                                <>
-                                    {menu}
-                                    <Divider
-                                        style={{
-                                            margin: '8px 0',
-                                        }}
-                                    />
-                                    <Space
-                                        style={{
-                                            padding: '0 8px 4px',
-                                        }}
-                                    >
-                                        <Input
-                                            placeholder="Введіть заголовок"
-                                            value={titleName}
-                                            onChange={onTitleNameChange}
-                                            ref={inputRef}
-                                        />
-                                        <Button type="dashed" icon={<PlusOutlined/>} onClick={addTitle}>
-                                            Додати
-                                        </Button>
-                                    </Space>
-                                </>
-                            )}
-                        >
-                            {
-                                priceList.map(item => {
-                                    return (
-                                        <Option key={item.title} value={item.title}>{item.title} </Option>
-                                    )
-                                })
-                            }
-                        </Select>
+                        {
+                            changeTitleActive ?
+                                <Input/> :
+                                <Select
+                                    onChange={handleChange}
+                                    style={{width: 300,}}
+                                    dropdownRender={(menu) => (
+                                        <>
+                                            {menu}
+                                            <Divider
+                                                style={{
+                                                    margin: '8px 0',
+                                                }}
+                                            />
+                                            <Space
+                                                style={{
+                                                    padding: '0 8px 4px',
+                                                }}
+                                            >
+                                                <Input
+                                                    placeholder="Введіть заголовок"
+                                                    value={titleName}
+                                                    onChange={onTitleNameChange}
+                                                    ref={inputRef}
+                                                />
+                                                <Button type="dashed" icon={<PlusOutlined/>} onClick={addTitle}>
+                                                    Додати
+                                                </Button>
+                                            </Space>
+                                        </>
+                                    )}
+                                >
+                                    {
+                                        priceList.map(item => {
+                                            return (
+                                                <Option key={item.title} value={item.title}>{item.title} </Option>
+                                            )
+                                        })
+                                    }
+                                </Select>
+                        }
                     </Form.Item>
                     {
                         activeTitle && <>
-                            <Button
-                                onClick={() => true}
-                            >
-                                Редагувати
-                            </Button>
+                            {
+                                changeTitleActive ?
+                                    <Button
+                                        onClick={confirmChangeActiveTitle}
+                                    >
+                                        Зберегти
+                                    </Button> :
+                                    <Button
+                                        onClick={showEditActiveTitle}
+                                    >
+                                        Редагувати
+                                    </Button>
+                            }
                             <Button
                                 onClick={deletePriceListItem}
                                 danger

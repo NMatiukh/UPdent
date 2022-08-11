@@ -1,4 +1,5 @@
 import {
+    CHANGE_PRICE_LIST_TITLE,
     CREATE_PRICE_LIST,
     DELETE_PRICE_LIST,
     EDIT_PRICE_LIST,
@@ -8,7 +9,7 @@ import {
 import {arrayWithDelete, arrayWithFilter, arrayWithFilterFromTitle} from "./someFunctions";
 
 const initialState = {
-    priceList: []
+    priceList: [],
 }
 
 export const priceListReducer = (state = initialState, action) => {
@@ -29,6 +30,11 @@ export const priceListReducer = (state = initialState, action) => {
             return {...state, priceList: arrayWithDelete(state.priceList, action)}
         case SET_PRICE_LIST:
             return {...state, priceList: [...state.priceList, action.payload]}
+        case CHANGE_PRICE_LIST_TITLE:
+            return {
+                ...state,
+                priceList: arrayWithFilter(state.priceList, action)
+            }
         default:
             return state
     }

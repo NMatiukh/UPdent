@@ -14,7 +14,7 @@ import {
     EDIT_PHOTO,
     GET_PRICE_LIST,
     CREATE_PRICE_LIST,
-    EDIT_PRICE_LIST, SET_PRICE_LIST, DELETE_PRICE_LIST
+    EDIT_PRICE_LIST, SET_PRICE_LIST, DELETE_PRICE_LIST, CHANGE_PRICE_LIST_TITLE
 } from "./types";
 
 const URL = 'https://fake-server-app-nmatiukh.herokuapp.com';
@@ -231,5 +231,11 @@ export function deletePriceList(priceList) {
             .then(() => {
                 dispatch({type: DELETE_PRICE_LIST, payload: priceList})
             })
+    }
+}
+export function changePriceListTitle(item){
+    return{
+        type: CHANGE_PRICE_LIST_TITLE,
+        payload: item
     }
 }
