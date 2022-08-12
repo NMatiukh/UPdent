@@ -74,23 +74,28 @@ export default function PriceList() {
     }
     return (
         <div>
+            <Row justify={"center"}>
+                <h1>Прайс-лист</h1>
+            </Row>
             <Form
                 form={form}
                 name={"editPriceListForTitle"}
                 onFinish={onFinish}
+                requiredMark={false}
             >
                 <Row justify={"space-between"} style={{width: "60%"}}>
                     <Form.Item
                         name={"title"}
-                        label="Заголовок"
+                        label="Підзаголовок"
                         rules={
                             [
                                 {
                                     required: true,
-                                    message: "Виберіть або створіть заголовок!"
+                                    message: "Виберіть або створіть підзаголовок!"
                                 }
                             ]
                         }
+
                     >
                         {
                             changeTitleActive ?
@@ -170,7 +175,6 @@ export default function PriceList() {
                                     <Row key={field.key} justify={"space-around"}>
                                         <Form.Item
                                             name={[index, "subtitle"]}
-                                            label="Підзаголовок"
                                             rules={
                                                 [
                                                     {

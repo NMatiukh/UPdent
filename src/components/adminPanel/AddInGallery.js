@@ -76,7 +76,6 @@ export default function AddInGallery() {
 
                 <Form.Item
                     name="upload"
-                    action={'https://fake-server-app-nmatiukh.herokuapp.com/posts'}
                     valuePropName="fileList"
                     getValueFromEvent={normFile}
                     wrapperCol={{offset: 8, span: 8}}
@@ -89,6 +88,7 @@ export default function AddInGallery() {
                 >
                     <Upload
                         name="photo"
+                        action={'https://fake-server-app-nmatiukh.herokuapp.com/posts'}
                         accept="image/png, image/jpeg"
                         listType="picture"
                         maxCount
