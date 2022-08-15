@@ -76,8 +76,9 @@ export function deletePriceList(priceList) {
             })
     }
 }
-export function changePriceListTitle(item){
-    return{
+
+export function changePriceListTitle(item) {
+    return {
         type: CHANGE_PRICE_LIST_TITLE,
         payload: item
     }
