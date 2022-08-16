@@ -83,15 +83,15 @@ export default function PriceList() {
                 onFinish={onFinish}
                 requiredMark={false}
             >
-                <Row justify={"space-between"} style={{width: "60%"}}>
+                <Row justify={"space-between"}>
                     <Form.Item
                         name={"title"}
-                        label="Підзаголовок"
+                        label="Група операцій"
                         rules={
                             [
                                 {
                                     required: true,
-                                    message: "Виберіть або створіть підзаголовок!"
+                                    message: "Виберіть або створіть операцію!"
                                 }
                             ]
                         }
@@ -99,7 +99,7 @@ export default function PriceList() {
                     >
                         {
                             changeTitleActive ?
-                                <Input style={{width: 300,}}/> :
+                                <Input placeholder="Введіть операцію" style={{width: 300,}}/> :
                                 <Select
                                     onChange={handleChange}
                                     style={{width: 300,}}
@@ -117,7 +117,7 @@ export default function PriceList() {
                                                 }}
                                             >
                                                 <Input
-                                                    placeholder="Введіть заголовок"
+                                                    placeholder="Введіть операцію"
                                                     value={titleName}
                                                     onChange={onTitleNameChange}
                                                     ref={inputRef}
@@ -146,12 +146,12 @@ export default function PriceList() {
                                     <Button
                                         onClick={confirmChangeActiveTitle}
                                     >
-                                        Зберегти
+                                        Зберегти групу
                                     </Button> :
                                     <Button
                                         onClick={showEditActiveTitle}
                                     >
-                                        Редагувати
+                                        Редагувати групу
                                     </Button>
                             }
                             <Button
@@ -159,12 +159,15 @@ export default function PriceList() {
                                 danger
                                 type={"primary"}
                             >
-                                Видалити
+                                Видалити групу
                             </Button>
                         </>
                     }
+                    <Button
+                    >
+                        Додати групу
+                    </Button>
                 </Row>
-
                 <Form.List
                     name={'details'}
                 >
@@ -186,10 +189,9 @@ export default function PriceList() {
                                             style={{width: "50%"}}
 
                                         >
-                                            <TextArea showCount maxLength={180} autoSize={{minRows: 4, maxRows: 8}}/>
+                                            <TextArea maxLength={180} autoSize={{minRows: 2, maxRows: 2}}/>
                                         </Form.Item>
                                         <Form.Item
-                                            label="Ціна"
                                             name={[index, "price"]}
                                             rules={
                                                 [
@@ -204,9 +206,8 @@ export default function PriceList() {
                                                     },
                                                 ]
                                             }
-                                            style={{width: "18%"}}
                                         >
-                                            <InputNumber addonAfter={"грн"}/>
+                                            <InputNumber/>
                                         </Form.Item>
                                         {fields.length > 1 ? (
                                             <Button
