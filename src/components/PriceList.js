@@ -1,50 +1,38 @@
-import {Button, Divider, Form, Input, InputNumber, Row, Select, Space} from "antd";
+import {Button, Col, Form, Input, InputNumber, Modal, Row, Select} from "antd";
 import {PlusOutlined} from "@ant-design/icons";
 import {useDispatch, useSelector} from "react-redux";
 import {
-    changePriceListTitle,
     createPriceList,
     deletePriceList,
     editPriceList,
-    getPriceList,
-    setPriceList
+    getPriceList, setPriceList
 } from "../redux/actions";
-import {useEffect, useRef, useState} from "react";
+import React, {useEffect, useState} from "react";
 import TextArea from "antd/es/input/TextArea";
 
 const {Option} = Select;
 
 export default function PriceList() {
     const [form] = Form.useForm();
+    const [addGroupNameForm] = Form.useForm();
     const dispatch = useDispatch();
     const priceList = useSelector(state => state.priceList.priceList)
-    const inputRef = useRef(null);
-    const [titleName, setTitleName] = useState('')
+    const [isModalAddVisible, setIsModalAddVisible] = useState(false);
+    const [isModalEditVisible, setIsModalEditVisible] = useState(false);
     const [activeTitle, setActiveTitle] = useState('')
-    const [changeTitleActive, setChangeTitleActive] = useState(false);
+
     useEffect(() => {
         dispatch(getPriceList())
     }, [dispatch])
-    const onTitleNameChange = (event) => {
-        setTitleName(event.target.value);
+
+    const showModal = (setIsModalVisible) => {
+        setIsModalVisible(true);
     };
-    const addTitle = (e) => {
-        e.preventDefault();
-        dispatch(setPriceList({
-            "title": titleName,
-            "details": [{}]
-        }))
-        setTitleName('');
-        setTimeout(() => {
-            inputRef.current?.focus();
-        }, 0);
+    const handleOk = (setIsModalVisible) => {
+        setIsModalVisible(false);
     };
-    const onFinish = (values) => {
-        if ({...priceList.filter(item => item.title === form.getFieldValue('title'))[0], ...values}.id === undefined) {
-            dispatch(createPriceList(values))
-        } else {
-            dispatch(editPriceList({...priceList.filter(item => item.title === form.getFieldValue('title'))[0], ...values}))
-        }
+    const handleCancel = (setIsModalVisible) => {
+        setIsModalVisible(false);
     };
     const handleChange = () => {
         form.setFieldsValue({
@@ -52,25 +40,40 @@ export default function PriceList() {
         });
         setActiveTitle(form.getFieldValue('title'))
     };
+
+    const submitAddGroupNameForm = () => {
+        addGroupNameForm.submit();
+        if (typeof addGroupNameForm.getFieldValue('title') === 'string' && addGroupNameForm.getFieldValue('title').trim().length !== 0) {
+            handleOk(setIsModalAddVisible)
+        }
+        console.log(addGroupNameForm.getFieldValue('title'))
+    }
+
+    const onFinish = (values) => {
+        if ({...priceList.filter(item => item.title === form.getFieldValue('title'))[0], ...values}.id === undefined) {
+            dispatch(createPriceList(values))
+        } else {
+            dispatch(editPriceList({...priceList.filter(item => item.title === form.getFieldValue('title'))[0], ...values}))
+        }
+    };
     const deletePriceListItem = () => {
         form.setFieldValue('title', '')
         setActiveTitle('')
         form.setFieldsValue({
             details: []
         })
-        if (priceList.filter(item => item.title === activeTitle)[0].id) {
-            dispatch(deletePriceList(priceList.filter(item => item.title === activeTitle)[0]))
-        }
+        dispatch(deletePriceList(priceList.filter(item => item.title === activeTitle)[0]))
     }
-    const showEditActiveTitle = () => {
-        setChangeTitleActive(true);
-    }
-    const confirmChangeActiveTitle = () => {
-        setChangeTitleActive(false);
-        let item = {...priceList.filter(item => item.title === activeTitle)[0]};
-        item.title = form.getFieldValue('title');
-        dispatch(changePriceListTitle(item))
-        setActiveTitle(form.getFieldValue('title'))
+    const createGroupName = (values) => {
+        dispatch(setPriceList({
+            "title": values.title,
+            "details": [{}]
+        }))
+        setActiveTitle(values.title)
+        form.setFieldsValue({
+            title: values.title,
+            details: [{}],
+        });
     }
     return (
         <div style={{margin: "0 20%"}}>
@@ -97,63 +100,33 @@ export default function PriceList() {
                         }
 
                     >
-                        {
-                            changeTitleActive ?
-                                <Input placeholder="Введіть операцію" style={{width: 300,}}/> :
-                                <Select
-                                    onChange={handleChange}
-                                    style={{width: 300,}}
-                                    dropdownRender={(menu) => (
-                                        <>
-                                            {menu}
-                                            <Divider
-                                                style={{
-                                                    margin: '8px 0',
-                                                }}
-                                            />
-                                            <Space
-                                                style={{
-                                                    padding: '0 8px 4px',
-                                                }}
-                                            >
-                                                <Input
-                                                    placeholder="Введіть операцію"
-                                                    value={titleName}
-                                                    onChange={onTitleNameChange}
-                                                    ref={inputRef}
-                                                />
-                                                <Button type="dashed" icon={<PlusOutlined/>} onClick={addTitle}>
-                                                    Додати
-                                                </Button>
-                                            </Space>
-                                        </>
-                                    )}
-                                >
-                                    {
-                                        priceList.map(item => {
-                                            return (
-                                                <Option key={item.title} value={item.title}>{item.title} </Option>
-                                            )
-                                        })
-                                    }
-                                </Select>
-                        }
+
+                        <Select
+                            onChange={handleChange}
+                            style={{width: 300,}}
+                        >
+                            {
+                                priceList.map(item => {
+                                    return (
+                                        <Option key={item.title} value={item.title}>{item.title} </Option>
+                                    )
+                                })
+                            }
+                        </Select>
                     </Form.Item>
+                    <Button
+                        type="dashed"
+                        icon={<PlusOutlined/>}
+                        onClick={() => showModal(setIsModalAddVisible)}>
+                        Додати групу
+                    </Button>
                     {
                         activeTitle && <>
-                            {
-                                changeTitleActive ?
-                                    <Button
-                                        onClick={confirmChangeActiveTitle}
-                                    >
-                                        Зберегти групу
-                                    </Button> :
-                                    <Button
-                                        onClick={showEditActiveTitle}
-                                    >
-                                        Редагувати групу
-                                    </Button>
-                            }
+                            <Button
+                                onClick={() => showModal(setIsModalEditVisible)}
+                            >
+                                Редагувати групу
+                            </Button>
                             <Button
                                 onClick={deletePriceListItem}
                                 danger
@@ -163,10 +136,6 @@ export default function PriceList() {
                             </Button>
                         </>
                     }
-                    <Button
-                    >
-                        Додати групу
-                    </Button>
                 </Row>
                 <Form.List
                     name={'details'}
@@ -174,51 +143,63 @@ export default function PriceList() {
                     {(fields, {add, remove}) => {
                         return (
                             <>
+                                {
+                                    activeTitle &&
+                                    <Row style={{marginBottom: "20px"}} justify={"space-around"}>
+                                        <Col span={10}>Операція</Col>
+                                        <Col span={2}>Ціна, грн</Col>
+                                        <Col span={2}></Col>
+                                    </Row>
+                                }
                                 {fields.map((field, index) => (
                                     <Row key={field.key} justify={"space-around"}>
-                                        <Form.Item
-                                            name={[index, "subtitle"]}
-                                            rules={
-                                                [
-                                                    {
-                                                        required: true,
-                                                        message: 'Введіть підзаголовок!'
-                                                    }
-                                                ]
-                                            }
-                                            style={{width: "50%"}}
-
-                                        >
-                                            <TextArea maxLength={180} autoSize={{minRows: 2, maxRows: 2}}/>
-                                        </Form.Item>
-                                        <Form.Item
-                                            name={[index, "price"]}
-                                            rules={
-                                                [
-                                                    {
-                                                        required: true,
-                                                        message: 'Введіть ціну!'
-                                                    },
-                                                    {
-                                                        type: 'number',
-                                                        min: 0,
-                                                        message: 'Введіть ціну більшу 0!'
-                                                    },
-                                                ]
-                                            }
-                                        >
-                                            <InputNumber/>
-                                        </Form.Item>
-                                        {fields.length > 1 ? (
-                                            <Button
-                                                danger
-                                                type="dashed"
-                                                className="dynamic-delete-button"
-                                                onClick={() => remove(field.name)}
+                                        <Col span={10}>
+                                            <Form.Item
+                                                name={[index, "subtitle"]}
+                                                rules={
+                                                    [
+                                                        {
+                                                            required: true,
+                                                            message: 'Введіть групу!'
+                                                        }
+                                                    ]
+                                                }
                                             >
-                                                Видалити поле
-                                            </Button>
-                                        ) : null}
+                                                <TextArea maxLength={180} autoSize={{minRows: 2, maxRows: 2}}/>
+                                            </Form.Item>
+                                        </Col>
+                                        <Col span={2}>
+                                            <Form.Item
+                                                name={[index, "price"]}
+                                                rules={
+                                                    [
+                                                        {
+                                                            required: true,
+                                                            message: 'Введіть ціну!'
+                                                        },
+                                                        {
+                                                            type: 'number',
+                                                            min: 0,
+                                                            message: 'Введіть ціну більшу 0!'
+                                                        },
+                                                    ]
+                                                }
+                                            >
+                                                <InputNumber/>
+                                            </Form.Item>
+                                        </Col>
+                                        <Col span={2}>
+                                            {fields.length > 1 ? (
+                                                <Button
+                                                    danger
+                                                    type="dashed"
+                                                    className="dynamic-delete-button"
+                                                    onClick={() => remove(field.name)}
+                                                >
+                                                    Видалити поле
+                                                </Button>
+                                            ) : null}
+                                        </Col>
                                     </Row>
                                 ))}
                                 <Form.Item>
@@ -241,6 +222,63 @@ export default function PriceList() {
                     </Button>
                 </Form.Item>
             </Form>
+            <Modal
+                title="Редагувати групу"
+                visible={isModalEditVisible}
+                onOk={() => handleOk(setIsModalEditVisible)}
+                onCancel={() => handleCancel(setIsModalEditVisible)}
+            >
+                <Input/>
+            </Modal>
+            <Modal
+                title="Додати групу"
+                destroyOnClose={true}
+                visible={isModalAddVisible}
+                footer={
+                    <Button
+                        key={"ok"}
+                        onClick={submitAddGroupNameForm}
+                        type={"primary"}
+                    >
+                        Підтвердити
+                    </Button>
+                }
+                onCancel={() => handleCancel(setIsModalAddVisible)}
+            >
+                <Form
+                    form={addGroupNameForm}
+                    name={"createGroupName"}
+                    requiredMark={false}
+                    preserve={false}
+                    onFinish={createGroupName}
+                >
+                    <Form.Item
+                        name="title"
+                        hasFeedback
+                        rules={[
+                            {
+                                validator: (_, value) => priceList.filter(item => item.title.toLowerCase() == value.toLowerCase()).length ? Promise.reject(new Error('Дана група вже існує!')) : Promise.resolve()
+
+                            },
+                            {
+                                required: true,
+                                message: "Введіть групу!"
+                            },
+                            () => ({
+                                validator(_, value) {
+                                    if (!value || value.trim().length !== 0) {
+                                        return Promise.resolve();
+                                    }
+                                    return Promise.reject(new Error('Введіть групу!'))
+                                }
+                            }),
+
+                        ]}
+                    >
+                        <Input placeholder="Введіть групу"/>
+                    </Form.Item>
+                </Form>
+            </Modal>
         </div>
     )
 }
