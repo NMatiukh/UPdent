@@ -1,5 +1,5 @@
 import {Button, Col, Form, Input, InputNumber, Modal, Row, Select} from "antd";
-import {PlusOutlined} from "@ant-design/icons";
+import {ExclamationCircleOutlined, PlusOutlined} from "@ant-design/icons";
 import {useDispatch, useSelector} from "react-redux";
 import {
     changePriceListTitle,
@@ -11,6 +11,7 @@ import {
 import React, {useEffect, useState} from "react";
 import TextArea from "antd/es/input/TextArea";
 
+const {confirm} = Modal;
 const {Option} = Select;
 
 export default function PriceList() {
@@ -62,6 +63,21 @@ export default function PriceList() {
         });
         setActiveTitle(form.getFieldValue('title'))
     };
+
+    const showPromiseConfirm = () => {
+        confirm({
+            title: `Ви хочете видалити групу?`,
+            icon: <ExclamationCircleOutlined/>,
+            okType: 'danger',
+            okText: 'Так',
+            cancelText: 'Ні',
+            onOk() {
+                deletePriceListItem();
+            },
+            onCancel() {
+            },
+        });
+    }
 
     const submitGroupNameForm = (form, setIsModalVisible) => {
         form.validateFields(['title'])
@@ -160,7 +176,7 @@ export default function PriceList() {
                                 Редагувати групу
                             </Button>
                             <Button
-                                onClick={deletePriceListItem}
+                                onClick={showPromiseConfirm}
                                 danger
                                 type={"primary"}
                             >
