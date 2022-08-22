@@ -68,12 +68,19 @@ export function setPriceList(item) {
 }
 
 export function deletePriceList(priceList) {
-    return async dispatch => {
-        axios
-            .delete(URL + "/priceList/" + priceList.id)
-            .then(() => {
-                dispatch({type: DELETE_PRICE_LIST, payload: priceList})
-            })
+    if (priceList.id === undefined) {
+        return {
+            type: DELETE_PRICE_LIST,
+            payload: priceList
+        }
+    } else {
+        return async dispatch => {
+            axios
+                .delete(URL + "/priceList/" + priceList.id)
+                .then(() => {
+                    dispatch({type: DELETE_PRICE_LIST, payload: priceList})
+                })
+        }
     }
 }
 
