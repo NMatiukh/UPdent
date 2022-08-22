@@ -2,6 +2,7 @@ import {Button, Col, Form, Input, InputNumber, Modal, Row, Select} from "antd";
 import {PlusOutlined} from "@ant-design/icons";
 import {useDispatch, useSelector} from "react-redux";
 import {
+    changePriceListTitle,
     createPriceList,
     deletePriceList,
     editPriceList,
@@ -15,11 +16,32 @@ const {Option} = Select;
 export default function PriceList() {
     const [form] = Form.useForm();
     const [addGroupNameForm] = Form.useForm();
+    const [editGroupNameForm] = Form.useForm();
     const dispatch = useDispatch();
     const priceList = useSelector(state => state.priceList.priceList)
     const [isModalAddVisible, setIsModalAddVisible] = useState(false);
     const [isModalEditVisible, setIsModalEditVisible] = useState(false);
     const [activeTitle, setActiveTitle] = useState('')
+
+    const validators = [
+        {
+            validator: (_, value) => priceList.filter(item => item.title.toLowerCase() == value.toLowerCase()).length ? Promise.reject(new Error('Дана група вже існує!')) : Promise.resolve()
+
+        },
+        {
+            required: true,
+            message: "Введіть групу!"
+        },
+        () => ({
+            validator(_, value) {
+                if (!value || value.trim().length !== 0) {
+                    return Promise.resolve();
+                }
+                return Promise.reject(new Error('Введіть групу!'))
+            }
+        }),
+
+    ]
 
     useEffect(() => {
         dispatch(getPriceList())
@@ -41,12 +63,15 @@ export default function PriceList() {
         setActiveTitle(form.getFieldValue('title'))
     };
 
-    const submitAddGroupNameForm = () => {
-        addGroupNameForm.submit();
-        if (typeof addGroupNameForm.getFieldValue('title') === 'string' && addGroupNameForm.getFieldValue('title').trim().length !== 0) {
-            handleOk(setIsModalAddVisible)
-        }
-        console.log(addGroupNameForm.getFieldValue('title'))
+    const submitGroupNameForm = (form, setIsModalVisible) => {
+        form.validateFields(['title'])
+            .then(() => {
+                form.submit();
+                handleOk(setIsModalVisible)
+            })
+            .catch(status => {
+                console.error(status)
+            })
     }
 
     const onFinish = (values) => {
@@ -73,6 +98,13 @@ export default function PriceList() {
         form.setFieldsValue({
             title: values.title,
             details: [{}],
+        });
+    }
+    const editGroupName = (values) => {
+        dispatch(changePriceListTitle({...priceList.filter(item => item.title === form.getFieldValue('title'))[0], ...values}))
+        setActiveTitle(values.title)
+        form.setFieldsValue({
+            title: values.title
         });
     }
     return (
@@ -225,10 +257,35 @@ export default function PriceList() {
             <Modal
                 title="Редагувати групу"
                 visible={isModalEditVisible}
-                onOk={() => handleOk(setIsModalEditVisible)}
+                destroyOnClose={true}
+                footer={
+                    <Button
+                        key={"editOk"}
+                        onClick={() => submitGroupNameForm(editGroupNameForm, setIsModalEditVisible)}
+                        type={"primary"}
+                    >
+                        Редагувати
+                    </Button>
+                }
+                onOk={() => submitGroupNameForm(editGroupNameForm, setIsModalEditVisible)}
                 onCancel={() => handleCancel(setIsModalEditVisible)}
             >
-                <Input/>
+                <Form
+                    form={editGroupNameForm}
+                    name={"editGroupName"}
+                    requiredMark={false}
+                    preserve={false}
+                    onFinish={editGroupName}
+                >
+                    <Form.Item
+                        name="title"
+                        hasFeedback
+                        initialValue={activeTitle}
+                        rules={validators}
+                    >
+                        <Input placeholder="Введіть групу"/>
+                    </Form.Item>
+                </Form>
             </Modal>
             <Modal
                 title="Додати групу"
@@ -236,13 +293,14 @@ export default function PriceList() {
                 visible={isModalAddVisible}
                 footer={
                     <Button
-                        key={"ok"}
-                        onClick={submitAddGroupNameForm}
+                        key={"addOk"}
+                        onClick={() => submitGroupNameForm(addGroupNameForm, setIsModalAddVisible)}
                         type={"primary"}
                     >
                         Підтвердити
                     </Button>
                 }
+                onOk={() => submitGroupNameForm(addGroupNameForm, setIsModalAddVisible)}
                 onCancel={() => handleCancel(setIsModalAddVisible)}
             >
                 <Form
@@ -255,25 +313,7 @@ export default function PriceList() {
                     <Form.Item
                         name="title"
                         hasFeedback
-                        rules={[
-                            {
-                                validator: (_, value) => priceList.filter(item => item.title.toLowerCase() == value.toLowerCase()).length ? Promise.reject(new Error('Дана група вже існує!')) : Promise.resolve()
-
-                            },
-                            {
-                                required: true,
-                                message: "Введіть групу!"
-                            },
-                            () => ({
-                                validator(_, value) {
-                                    if (!value || value.trim().length !== 0) {
-                                        return Promise.resolve();
-                                    }
-                                    return Promise.reject(new Error('Введіть групу!'))
-                                }
-                            }),
-
-                        ]}
+                        rules={validators}
                     >
                         <Input placeholder="Введіть групу"/>
                     </Form.Item>
