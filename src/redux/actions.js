@@ -23,7 +23,7 @@ export function getPriceList() {
 
 export function editPriceList(priceList) {
     return async dispatch => {
-        message.loading('Loading...', 1);
+        message.loading('Завантаження...', 1);
         axios
             .request({
                 method: "PUT",
@@ -32,17 +32,17 @@ export function editPriceList(priceList) {
             })
             .then(() => {
                 dispatch({type: EDIT_PRICE_LIST, payload: priceList})
-                message.success(`The photo "${priceList.title}" edited!`);
+                message.success(`"${priceList.title}" редаговано!`);
             })
             .catch(() => {
-                message.error('This photo not edited!');
+                message.error('Помика! Не вдалось відредагувати');
             })
     }
 }
 
 export function createPriceList(priceList) {
     return async dispatch => {
-        message.loading('Loading...', 1);
+        message.loading('Завантаження...', 1);
         axios
             .request({
                 method: "POST",
@@ -51,10 +51,10 @@ export function createPriceList(priceList) {
             })
             .then(response => {
                 dispatch({type: CREATE_PRICE_LIST, payload: response.data});
-                message.success(`The "${priceList.title}" created!`);
+                message.success(`"${priceList.title}" створено!`);
             })
             .catch((error) => {
-                message.error('This photo not created!');
+                message.error('Помика! Не вдалось створити!');
                 console.log(error)
             })
     }
