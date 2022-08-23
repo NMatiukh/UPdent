@@ -1,4 +1,4 @@
-import {Button, Col, Form, Input, InputNumber, Menu, Modal, Row, Select} from "antd";
+import {Button, Col, Form, Input, InputNumber, Menu, Modal, Row, Typography} from "antd";
 import {ExclamationCircleOutlined, PlusOutlined} from "@ant-design/icons";
 import {useDispatch, useSelector} from "react-redux";
 import {
@@ -10,8 +10,10 @@ import {
 } from "../redux/actions";
 import React, {useEffect, useState} from "react";
 import TextArea from "antd/es/input/TextArea";
+import './style/PriceList.css';
 
 const {confirm} = Modal;
+const {Title} = Typography;
 
 export default function PriceList() {
     const [form] = Form.useForm();
@@ -25,7 +27,7 @@ export default function PriceList() {
 
     const validators = [
         {
-            validator: (_, value) => priceList.filter(item => item.title.toLowerCase() == value.toLowerCase()).length ? Promise.reject(new Error('Дана група вже існує!')) : Promise.resolve()
+            validator: (_, value) => priceList.filter(item => item.title.toLowerCase() === value.toLowerCase()).length ? Promise.reject(new Error('Дана група вже існує!')) : Promise.resolve()
 
         },
         {
@@ -121,206 +123,222 @@ export default function PriceList() {
         });
     }
     return (
-        <div style={{margin: "0 20%"}}>
+        <div>
             <Row justify={"center"}>
-                <h1>Прайс-лист</h1>
+                <Title>Прайс-лист</Title>
             </Row>
-            <Form
-                form={form}
-                name={"editPriceListForTitle"}
-                onFinish={onFinish}
-                requiredMark={false}
-            >
-                <Row justify={"space-between"}>
-                    <Col span={6}>
-                        <Menu
-                            mode="inline"
-                            items={priceList.map(value => {
-                                return {label: value.title, key: value.title}
-                            })}
-                            onClick={(item) => handleChange(item)}
-                            selectable={[activeTitle]}
-                            selectedKeys={[activeTitle]}
-                        >
-                        </Menu>
-                    </Col>
-                    <Col span={16}>
-                        <Row justify={"space-between"} style={{marginBottom: "30px"}}>
-                            <Button
-                                type="dashed"
-                                icon={<PlusOutlined/>}
-                                onClick={() => showModal(setIsModalAddVisible)}>
-                                Додати групу
-                            </Button>
-                            {
-                                activeTitle && <>
+            <Row justify={"space-between"}>
+                <Col span={4}>
+                    <Menu
+                        mode="inline"
+                        items={priceList.map(value => {
+                            return {
+                                label: value.title,
+                                key: value.title
+                            }
+                        })}
+                        onClick={(item) => handleChange(item)}
+                        selectable={[activeTitle]}
+                        selectedKeys={[activeTitle]}
+                    />
+                </Col>
+                <Col span={20}>
+                    <Row justify={"center"}>
+                        <Col span={18}>
+                            <Form
+                                form={form}
+                                name={"editPriceListForTitle"}
+                                onFinish={onFinish}
+                                requiredMark={false}
+                            >
+                                <Form.List
+                                    name={'details'}
+                                >
+                                    {(fields, {add, remove}) => {
+                                        return (
+                                            <>
+                                                {
+                                                    activeTitle &&
+                                                    <Row style={{marginBottom: "20px"}} justify={"space-between"}>
+                                                        <Col span={10}>
+                                                            <Title level={5}>
+                                                                Операція
+                                                            </Title>
+                                                        </Col>
+                                                        <Col span={2}>
+                                                            <Title level={5}>
+                                                                Ціна, грн
+                                                            </Title>
+                                                        </Col>
+                                                        <Col span={3}/>
+                                                    </Row>
+                                                }
+                                                {fields.map((field, index) => (
+                                                    <Row className="activeOperation" key={field.key} justify={"space-between"}>
+                                                        <Col span={10}>
+                                                            <Form.Item
+                                                                name={[index, "subtitle"]}
+                                                                rules={
+                                                                    [
+                                                                        {
+                                                                            required: true,
+                                                                            message: 'Введіть групу!'
+                                                                        }
+                                                                    ]
+                                                                }
+                                                            >
+                                                                <TextArea maxLength={180} autoSize={{minRows: 2, maxRows: 2}}/>
+                                                            </Form.Item>
+                                                        </Col>
+                                                        <Col span={2}>
+                                                            <Form.Item
+                                                                name={[index, "price"]}
+                                                                rules={
+                                                                    [
+                                                                        {
+                                                                            required: true,
+                                                                            message: 'Введіть ціну!'
+                                                                        },
+                                                                        {
+                                                                            type: 'number',
+                                                                            min: 0,
+                                                                            message: 'Введіть ціну більшу 0!'
+                                                                        },
+                                                                    ]
+                                                                }
+                                                            >
+                                                                <InputNumber/>
+                                                            </Form.Item>
+                                                        </Col>
+                                                        <Col>
+                                                            {fields.length > 1 ? (
+                                                                <Button
+                                                                    danger
+                                                                    type="dashed"
+                                                                    onClick={() => remove(field.name)}
+                                                                >
+                                                                    Видалити поле
+                                                                </Button>
+                                                            ) : <Col span={3}/>}
+                                                        </Col>
+                                                    </Row>
+                                                ))}
+                                                <Form.Item>
+                                                    <Button
+                                                        disabled={!activeTitle}
+                                                        type="dashed"
+                                                        onClick={() => add()}
+                                                        style={{width: "100%"}}
+                                                    >
+                                                        <PlusOutlined/> Додати поле
+                                                    </Button>
+                                                </Form.Item>
+                                            </>
+                                        );
+                                    }}
+                                </Form.List>
+                                <Row justify={"space-between"} style={{marginBottom: "30px"}}>
                                     <Button
-                                        onClick={() => showModal(setIsModalEditVisible)}
-                                    >
-                                        Редагувати групу
+                                        type="dashed"
+                                        icon={<PlusOutlined/>}
+                                        onClick={() => showModal(setIsModalAddVisible)}>
+                                        Додати групу
                                     </Button>
+                                    {
+                                        activeTitle && <>
+                                            <Button
+                                                onClick={() => showModal(setIsModalEditVisible)}
+                                            >
+                                                Редагувати групу
+                                            </Button>
+                                            <Button
+                                                onClick={showPromiseConfirm}
+                                                danger
+                                                type={"primary"}
+                                            >
+                                                Видалити групу
+                                            </Button>
+                                        </>
+                                    }
+                                </Row>
+                                <Form.Item>
                                     <Button
-                                        onClick={showPromiseConfirm}
-                                        danger
+                                        type="primary"
+                                        htmlType="submit"
+                                    >
+                                        Зберегти
+                                    </Button>
+                                </Form.Item>
+                            </Form>
+                            <Modal
+                                title="Редагувати групу"
+                                visible={isModalEditVisible}
+                                destroyOnClose={true}
+                                footer={
+                                    <Button
+                                        key={"editOk"}
+                                        onClick={() => submitGroupNameForm(editGroupNameForm, setIsModalEditVisible)}
                                         type={"primary"}
                                     >
-                                        Видалити групу
+                                        Редагувати
                                     </Button>
-                                </>
-                            }
-                        </Row>
-                        <Form.List
-                            name={'details'}
-                        >
-                            {(fields, {add, remove}) => {
-                                return (
-                                    <>
-                                        {
-                                            activeTitle &&
-                                            <Row style={{marginBottom: "20px"}} justify={"space-around"}>
-                                                <Col span={10}>Операція</Col>
-                                                <Col span={2}>Ціна, грн</Col>
-                                                <Col span={2}></Col>
-                                            </Row>
-                                        }
-                                        {fields.map((field, index) => (
-                                            <Row key={field.key} justify={"space-around"}>
-                                                <Col span={10}>
-                                                    <Form.Item
-                                                        name={[index, "subtitle"]}
-                                                        rules={
-                                                            [
-                                                                {
-                                                                    required: true,
-                                                                    message: 'Введіть групу!'
-                                                                }
-                                                            ]
-                                                        }
-                                                    >
-                                                        <TextArea maxLength={180} autoSize={{minRows: 2, maxRows: 2}}/>
-                                                    </Form.Item>
-                                                </Col>
-                                                <Col span={2}>
-                                                    <Form.Item
-                                                        name={[index, "price"]}
-                                                        rules={
-                                                            [
-                                                                {
-                                                                    required: true,
-                                                                    message: 'Введіть ціну!'
-                                                                },
-                                                                {
-                                                                    type: 'number',
-                                                                    min: 0,
-                                                                    message: 'Введіть ціну більшу 0!'
-                                                                },
-                                                            ]
-                                                        }
-                                                    >
-                                                        <InputNumber/>
-                                                    </Form.Item>
-                                                </Col>
-                                                <Col span={2}>
-                                                    {fields.length > 1 ? (
-                                                        <Button
-                                                            danger
-                                                            type="dashed"
-                                                            className="dynamic-delete-button"
-                                                            onClick={() => remove(field.name)}
-                                                        >
-                                                            Видалити поле
-                                                        </Button>
-                                                    ) : null}
-                                                </Col>
-                                            </Row>
-                                        ))}
-                                        <Form.Item>
-                                            <Button
-                                                disabled={!activeTitle}
-                                                type="dashed"
-                                                onClick={() => add()}
-                                                style={{width: "100%"}}
-                                            >
-                                                <PlusOutlined/> Додати поле
-                                            </Button>
-                                        </Form.Item>
-                                    </>
-                                );
-                            }}
-                        </Form.List>
-                        <Form.Item>
-                            <Button type="primary" htmlType="submit">
-                                Зберегти
-                            </Button>
-                        </Form.Item>
-                    </Col>
-                </Row>
-            </Form>
-            <Modal
-                title="Редагувати групу"
-                visible={isModalEditVisible}
-                destroyOnClose={true}
-                footer={
-                    <Button
-                        key={"editOk"}
-                        onClick={() => submitGroupNameForm(editGroupNameForm, setIsModalEditVisible)}
-                        type={"primary"}
-                    >
-                        Редагувати
-                    </Button>
-                }
-                onOk={() => submitGroupNameForm(editGroupNameForm, setIsModalEditVisible)}
-                onCancel={() => handleCancel(setIsModalEditVisible)}
-            >
-                <Form
-                    form={editGroupNameForm}
-                    name={"editGroupName"}
-                    requiredMark={false}
-                    preserve={false}
-                    onFinish={editGroupName}
-                >
-                    <Form.Item
-                        name="title"
-                        hasFeedback
-                        initialValue={activeTitle}
-                        rules={validators}
-                    >
-                        <Input placeholder="Введіть групу"/>
-                    </Form.Item>
-                </Form>
-            </Modal>
-            <Modal
-                title="Додати групу"
-                destroyOnClose={true}
-                visible={isModalAddVisible}
-                footer={
-                    <Button
-                        key={"addOk"}
-                        onClick={() => submitGroupNameForm(addGroupNameForm, setIsModalAddVisible)}
-                        type={"primary"}
-                    >
-                        Підтвердити
-                    </Button>
-                }
-                onOk={() => submitGroupNameForm(addGroupNameForm, setIsModalAddVisible)}
-                onCancel={() => handleCancel(setIsModalAddVisible)}
-            >
-                <Form
-                    form={addGroupNameForm}
-                    name={"createGroupName"}
-                    requiredMark={false}
-                    preserve={false}
-                    onFinish={createGroupName}
-                >
-                    <Form.Item
-                        name="title"
-                        hasFeedback
-                        rules={validators}
-                    >
-                        <Input placeholder="Введіть групу"/>
-                    </Form.Item>
-                </Form>
-            </Modal>
+                                }
+                                onOk={() => submitGroupNameForm(editGroupNameForm, setIsModalEditVisible)}
+                                onCancel={() => handleCancel(setIsModalEditVisible)}
+                            >
+                                <Form
+                                    form={editGroupNameForm}
+                                    name={"editGroupName"}
+                                    requiredMark={false}
+                                    preserve={false}
+                                    onFinish={editGroupName}
+                                >
+                                    <Form.Item
+                                        name="title"
+                                        hasFeedback
+                                        initialValue={activeTitle}
+                                        rules={validators}
+                                    >
+                                        <Input placeholder="Введіть групу"/>
+                                    </Form.Item>
+                                </Form>
+                            </Modal>
+                            <Modal
+                                title="Додати групу"
+                                destroyOnClose={true}
+                                visible={isModalAddVisible}
+                                footer={
+                                    <Button
+                                        key={"addOk"}
+                                        onClick={() => submitGroupNameForm(addGroupNameForm, setIsModalAddVisible)}
+                                        type={"primary"}
+                                    >
+                                        Підтвердити
+                                    </Button>
+                                }
+                                onOk={() => submitGroupNameForm(addGroupNameForm, setIsModalAddVisible)}
+                                onCancel={() => handleCancel(setIsModalAddVisible)}
+                            >
+                                <Form
+                                    form={addGroupNameForm}
+                                    name={"createGroupName"}
+                                    requiredMark={false}
+                                    preserve={false}
+                                    onFinish={createGroupName}
+                                >
+                                    <Form.Item
+                                        name="title"
+                                        hasFeedback
+                                        rules={validators}
+                                    >
+                                        <Input placeholder="Введіть групу"/>
+                                    </Form.Item>
+                                </Form>
+                            </Modal>
+                        </Col>
+                    </Row>
+                </Col>
+            </Row>
         </div>
     )
 }

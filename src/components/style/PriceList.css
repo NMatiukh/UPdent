@@ -1,0 +1,19 @@
+.activeOperation {
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    border: 1px solid rgba(255, 255, 255, 0);
+}
+
+.activeOperation:hover {
+    background-color: #e6f7ff;
+    border: 1px solid #bae7ff;
+}
+
+.fontSize18 {
+    font-size: 18px;
+}
+
+.fontSize16 {
+    font-size: 16px;
+}

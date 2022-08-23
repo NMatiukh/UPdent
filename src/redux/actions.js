@@ -68,7 +68,9 @@ export function setPriceList(item) {
 }
 
 export function deletePriceList(priceList) {
+    message.loading('Завантаження...', 1);
     if (priceList.id === undefined) {
+        message.success(`"${priceList.title}" редаговано!`);
         return {
             type: DELETE_PRICE_LIST,
             payload: priceList
@@ -78,8 +80,11 @@ export function deletePriceList(priceList) {
             axios
                 .delete(URL + "/priceList/" + priceList.id)
                 .then(() => {
+                    message.success(`"${priceList.title}" видалено!`);
                     dispatch({type: DELETE_PRICE_LIST, payload: priceList})
-                })
+                }).catch(r => {
+                message.error('Помика! Не вдалось видалити!');
+            })
         }
     }
 }
