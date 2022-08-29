@@ -242,7 +242,7 @@ export default function PriceList() {
                                                 }
                                                 <div
                                                     style={{
-                                                        height: 400,
+                                                        height: ((80 * document.documentElement.clientHeight) / 100),
                                                         overflow: 'auto',
                                                     }}
                                                 >
