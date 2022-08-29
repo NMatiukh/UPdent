@@ -189,23 +189,29 @@ export default function PriceList() {
                 <Title>Прайс-лист</Title>
             </Row>
             <Row justify={"space-between"}>
-                <Col span={4}>
-                    <Menu
-                        style={{
-                            maxHeight: ((90 * document.documentElement.clientHeight) / 100),
-                            overflow: 'auto'
-                        }}
-                        mode="vertical"
-                        items={priceList.map(value => {
-                            return {
-                                label: value.title,
-                                key: value.title
-                            }
-                        })}
-                        onClick={(item) => handleChange(item)}
-                        selectable={[activeTitle]}
-                        selectedKeys={[activeTitle]}
-                    />
+                <Col
+                    span={4}
+                    style={{
+                        maxHeight: ((85 * document.documentElement.clientHeight) / 100),
+                        overflow: 'auto',
+                    }}
+                >
+                    <InfiniteScroll
+                        dataLength={priceList.length}
+                    >
+                        <Menu
+                            mode="inline"
+                            items={priceList.map(value => {
+                                return {
+                                    label: value.title,
+                                    key: value.title
+                                }
+                            })}
+                            onClick={(item) => handleChange(item)}
+                            selectable={[activeTitle]}
+                            selectedKeys={[activeTitle]}
+                        />
+                    </InfiniteScroll>
                 </Col>
                 <Col span={20}>
                     <Row justify={"space-between"} style={{marginLeft: "10%"}}>
@@ -246,22 +252,12 @@ export default function PriceList() {
                                                 }
                                                 <div
                                                     style={{
-                                                        maxHeight: ((90 * document.documentElement.clientHeight) / 100),
+                                                        maxHeight: ((80 * document.documentElement.clientHeight) / 100),
                                                         overflow: 'auto',
                                                     }}
                                                 >
                                                     <InfiniteScroll
                                                         dataLength={fields.length}
-                                                        loader={
-                                                            <Skeleton
-                                                                avatar
-                                                                paragraph={{
-                                                                    rows: 1,
-                                                                }}
-                                                                active
-                                                            />
-                                                        }
-                                                        scrollableTarget="scrollableDiv"
                                                     >
                                                         {fields.map((field, index) => (
                                                             <Row key={field.key}
