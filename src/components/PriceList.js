@@ -1,17 +1,13 @@
 import {
     Button,
     Checkbox,
-    Col, Divider,
-    Form,
+    Col, Drawer, Form,
     Input,
     InputNumber,
-    List,
     Menu,
     Modal,
     Row,
     Select,
-    Skeleton,
-    Table,
     Typography
 } from "antd";
 import {ExclamationCircleOutlined, PlusOutlined} from "@ant-design/icons";
@@ -49,6 +45,7 @@ export default function PriceList() {
     const [isModalAddVisible, setIsModalAddVisible] = useState(false);
     const [isModalEditVisible, setIsModalEditVisible] = useState(false);
     const [isModalTransferFieldsVisible, setIsModalTransferFieldsVisible] = useState(false);
+    const [isVisibleDrawer, setIsVisibleDrawer] = useState(false);
 
     const [activeTitle, setActiveTitle] = useState('')
 
@@ -76,6 +73,13 @@ export default function PriceList() {
         dispatch(getPriceList())
     }, [dispatch])
 
+    const showDrawer = () => {
+        setIsVisibleDrawer(true);
+    };
+
+    const onCloseDrawer = () => {
+        setIsVisibleDrawer(false);
+    };
     const showModal = (setIsModalVisible) => {
         setIsModalVisible(true);
     };
@@ -244,9 +248,8 @@ export default function PriceList() {
                                                             </Text>
                                                         </Col>
                                                         <Col span={mainColSpanValues.button}>
-                                                            <Button
-                                                                onClick={() => showModal(setIsModalTransferFieldsVisible)}>
-                                                                Перенести поля
+                                                            <Button onClick={showDrawer}>
+                                                                Open
                                                             </Button>
                                                         </Col>
                                                     </Row>
@@ -452,6 +455,8 @@ export default function PriceList() {
                                         </Select>
                                     </Form.Item>
                                 </Form>
+                            </Modal>
+                            <Drawer placment={'right'} onClose={onCloseDrawer} visible={isVisibleDrawer}>
                                 <Row justify={"space-between"} style={{marginBottom: "30px"}}>
                                     <Button
                                         onClick={() => showModal(setIsModalAddVisible)}>
@@ -471,6 +476,10 @@ export default function PriceList() {
                                             >
                                                 Видалити групу
                                             </Button>
+                                            <Button
+                                                onClick={() => showModal(setIsModalTransferFieldsVisible)}>
+                                                Перенести поля
+                                            </Button>
                                             <Form.Item>
                                                 <Button
                                                     type="primary"
@@ -482,7 +491,7 @@ export default function PriceList() {
                                         </>
                                     }
                                 </Row>
-                            </Modal>
+                            </Drawer>
                         </Col>
                     </Row>
                 </Col>
