@@ -191,7 +191,11 @@ export default function PriceList() {
             <Row justify={"space-between"}>
                 <Col span={4}>
                     <Menu
-                        mode="inline"
+                        style={{
+                            maxHeight: ((90 * document.documentElement.clientHeight) / 100),
+                            overflow: 'auto'
+                        }}
+                        mode="vertical"
                         items={priceList.map(value => {
                             return {
                                 label: value.title,
@@ -335,36 +339,6 @@ export default function PriceList() {
                                         );
                                     }}
                                 </Form.List>
-                                {/*<Row justify={"space-between"} style={{marginBottom: "30px"}}>*/}
-                                {/*    <Button*/}
-                                {/*        onClick={() => showModal(setIsModalAddVisible)}>*/}
-                                {/*        Додати групу*/}
-                                {/*    </Button>*/}
-                                {/*    {*/}
-                                {/*        activeTitle && <>*/}
-                                {/*            <Button*/}
-                                {/*                onClick={() => showModal(setIsModalEditVisible)}*/}
-                                {/*            >*/}
-                                {/*                Редагувати групу*/}
-                                {/*            </Button>*/}
-                                {/*            <Button*/}
-                                {/*                onClick={showPromiseConfirm}*/}
-                                {/*                danger*/}
-                                {/*                type={"primary"}*/}
-                                {/*            >*/}
-                                {/*                Видалити групу*/}
-                                {/*            </Button>*/}
-                                {/*            <Form.Item>*/}
-                                {/*                <Button*/}
-                                {/*                    type="primary"*/}
-                                {/*                    htmlType="submit"*/}
-                                {/*                >*/}
-                                {/*                    Зберегти*/}
-                                {/*                </Button>*/}
-                                {/*            </Form.Item>*/}
-                                {/*        </>*/}
-                                {/*    }*/}
-                                {/*</Row>*/}
                             </Form>
                             <Modal
                                 title="Редагувати групу"
@@ -478,6 +452,36 @@ export default function PriceList() {
                                         </Select>
                                     </Form.Item>
                                 </Form>
+                                <Row justify={"space-between"} style={{marginBottom: "30px"}}>
+                                    <Button
+                                        onClick={() => showModal(setIsModalAddVisible)}>
+                                        Додати групу
+                                    </Button>
+                                    {
+                                        activeTitle && <>
+                                            <Button
+                                                onClick={() => showModal(setIsModalEditVisible)}
+                                            >
+                                                Редагувати групу
+                                            </Button>
+                                            <Button
+                                                onClick={showPromiseConfirm}
+                                                danger
+                                                type={"primary"}
+                                            >
+                                                Видалити групу
+                                            </Button>
+                                            <Form.Item>
+                                                <Button
+                                                    type="primary"
+                                                    htmlType="submit"
+                                                >
+                                                    Зберегти
+                                                </Button>
+                                            </Form.Item>
+                                        </>
+                                    }
+                                </Row>
                             </Modal>
                         </Col>
                     </Row>
