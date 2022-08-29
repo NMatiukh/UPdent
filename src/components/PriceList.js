@@ -1,4 +1,19 @@
-import {Button, Checkbox, Col, Form, Input, InputNumber, Menu, Modal, Row, Select, Typography} from "antd";
+import {
+    Button,
+    Checkbox,
+    Col, Divider,
+    Form,
+    Input,
+    InputNumber,
+    List,
+    Menu,
+    Modal,
+    Row,
+    Select,
+    Skeleton,
+    Table,
+    Typography
+} from "antd";
 import {ExclamationCircleOutlined, PlusOutlined} from "@ant-design/icons";
 import {useDispatch, useSelector} from "react-redux";
 import {
@@ -10,6 +25,7 @@ import {
 } from "../redux/actions";
 import React, {useEffect, useState} from "react";
 import TextArea from "antd/es/input/TextArea";
+import InfiniteScroll from 'react-infinite-scroll-component';
 import './style/PriceList.css';
 
 const {Option} = Select;
@@ -201,7 +217,10 @@ export default function PriceList() {
                                 >
                                     {(fields, {add, remove}) => {
                                         return (
-                                            <>
+                                            <div style={{
+                                                height: 400,
+                                                overflow: 'auto',
+                                            }}>
                                                 {
                                                     activeTitle &&
                                                     <Row style={{marginBottom: "20px"}} justify={"space-between"}>
@@ -224,66 +243,81 @@ export default function PriceList() {
                                                         </Col>
                                                     </Row>
                                                 }
-                                                {fields.map((field, index) => (
-                                                    <Row key={field.key}
-                                                         justify={"space-between"}>
-                                                        <Col span={mainColSpanValues.checkbox}>
-                                                            <Form.Item
-                                                                name={[index, "status"]}
-                                                                valuePropName="checked"
-                                                            >
-                                                                <Checkbox/>
-                                                            </Form.Item>
-                                                        </Col>
-                                                        <Col span={mainColSpanValues.operation}>
-                                                            <Form.Item
-                                                                name={[index, "subtitle"]}
-                                                                rules={
-                                                                    [
-                                                                        {
-                                                                            required: true,
-                                                                            message: 'Введіть операцію!'
-                                                                        }
-                                                                    ]
-                                                                }
-                                                            >
-                                                                <TextArea maxLength={180}
-                                                                          autoSize={{minRows: 2, maxRows: 2}}/>
-                                                            </Form.Item>
-                                                        </Col>
-                                                        <Col span={mainColSpanValues.price}>
-                                                            <Form.Item
-                                                                name={[index, "price"]}
-                                                                rules={
-                                                                    [
-                                                                        {
-                                                                            required: true,
-                                                                            message: 'Введіть ціну!'
-                                                                        },
-                                                                        {
-                                                                            type: 'number',
-                                                                            min: 0,
-                                                                            message: 'Введіть ціну більшу 0!'
-                                                                        },
-                                                                    ]
-                                                                }
-                                                            >
-                                                                <InputNumber/>
-                                                            </Form.Item>
-                                                        </Col>
-                                                        <Col span={mainColSpanValues.button}>
-                                                            {fields.length > 1 ? (
-                                                                <Button
-                                                                    danger
-                                                                    type="dashed"
-                                                                    onClick={() => remove(field.name)}
+                                                <InfiniteScroll
+                                                    dataLength={fields.length}
+                                                    loader={
+                                                        <Skeleton
+                                                            avatar
+                                                            paragraph={{
+                                                                rows: 1,
+                                                            }}
+                                                            active
+                                                        />
+                                                    }
+                                                    endMessage={<Divider plain>Це все, більше нічого немає 🤐</Divider>}
+                                                    scrollableTarget="scrollableDiv"
+                                                >
+                                                    {fields.map((field, index) => (
+                                                        <Row key={field.key}
+                                                             justify={"space-between"}>
+                                                            <Col span={mainColSpanValues.checkbox}>
+                                                                <Form.Item
+                                                                    name={[index, "status"]}
+                                                                    valuePropName="checked"
                                                                 >
-                                                                    Видалити поле
-                                                                </Button>
-                                                            ) : <Col span={mainColSpanValues.button}/>}
-                                                        </Col>
-                                                    </Row>
-                                                ))}
+                                                                    <Checkbox/>
+                                                                </Form.Item>
+                                                            </Col>
+                                                            <Col span={mainColSpanValues.operation}>
+                                                                <Form.Item
+                                                                    name={[index, "subtitle"]}
+                                                                    rules={
+                                                                        [
+                                                                            {
+                                                                                required: true,
+                                                                                message: 'Введіть операцію!'
+                                                                            }
+                                                                        ]
+                                                                    }
+                                                                >
+                                                                    <TextArea maxLength={180}
+                                                                              autoSize={{minRows: 2, maxRows: 2}}/>
+                                                                </Form.Item>
+                                                            </Col>
+                                                            <Col span={mainColSpanValues.price}>
+                                                                <Form.Item
+                                                                    name={[index, "price"]}
+                                                                    rules={
+                                                                        [
+                                                                            {
+                                                                                required: true,
+                                                                                message: 'Введіть ціну!'
+                                                                            },
+                                                                            {
+                                                                                type: 'number',
+                                                                                min: 0,
+                                                                                message: 'Введіть ціну більшу 0!'
+                                                                            },
+                                                                        ]
+                                                                    }
+                                                                >
+                                                                    <InputNumber/>
+                                                                </Form.Item>
+                                                            </Col>
+                                                            <Col span={mainColSpanValues.button}>
+                                                                {fields.length > 1 ? (
+                                                                    <Button
+                                                                        danger
+                                                                        type="dashed"
+                                                                        onClick={() => remove(field.name)}
+                                                                    >
+                                                                        Видалити поле
+                                                                    </Button>
+                                                                ) : <Col span={mainColSpanValues.button}/>}
+                                                            </Col>
+                                                        </Row>
+                                                    ))}
+                                                </InfiniteScroll>
                                                 <Form.Item>
                                                     <Button
                                                         disabled={!activeTitle}
@@ -294,7 +328,7 @@ export default function PriceList() {
                                                         <PlusOutlined/> Додати поле
                                                     </Button>
                                                 </Form.Item>
-                                            </>
+                                            </div>
                                         );
                                     }}
                                 </Form.List>
