@@ -1,4 +1,4 @@
-import {Button, Col, Form, Input, InputNumber, Menu, Modal, Row, Typography} from "antd";
+import {Button, Checkbox, Col, Form, Input, InputNumber, Menu, Modal, Row, Select, Typography} from "antd";
 import {ExclamationCircleOutlined, PlusOutlined} from "@ant-design/icons";
 import {useDispatch, useSelector} from "react-redux";
 import {
@@ -12,17 +12,28 @@ import React, {useEffect, useState} from "react";
 import TextArea from "antd/es/input/TextArea";
 import './style/PriceList.css';
 
+const {Option} = Select;
 const {confirm} = Modal;
-const {Title} = Typography;
+const {Title, Text} = Typography;
+
+const mainColSpanValues = {
+    "checkbox": 1,
+    "operation": 8,
+    "price": 3,
+    "button": 4
+}
 
 export default function PriceList() {
     const [form] = Form.useForm();
     const [addGroupNameForm] = Form.useForm();
     const [editGroupNameForm] = Form.useForm();
+    const [transferFieldsForm] = Form.useForm();
     const dispatch = useDispatch();
     const priceList = useSelector(state => state.priceList.priceList)
     const [isModalAddVisible, setIsModalAddVisible] = useState(false);
     const [isModalEditVisible, setIsModalEditVisible] = useState(false);
+    const [isModalTransferFieldsVisible, setIsModalTransferFieldsVisible] = useState(false);
+
     const [activeTitle, setActiveTitle] = useState('')
 
     const validators = [
@@ -122,6 +133,40 @@ export default function PriceList() {
             title: values.title
         });
     }
+    const returnCheckedItems = () => {
+        let detailsTrue = form.getFieldsValue().details.filter(value => value.status);
+        let detailsFalse = form.getFieldsValue().details.filter(value => !value.status);
+
+        let element = Object.assign({}, priceList.filter(item => item.title === transferFieldsForm.getFieldValue('title'))[0]);
+        element.details = [...element.details, ...detailsTrue.map(
+            value => {
+                return {
+                    "subtitle": value.subtitle,
+                    "price": value.price
+                }
+            }
+        )
+        ]
+        let editElement = Object.assign({}, {
+            ...priceList.filter(value => value.title === activeTitle)[0], ...{
+                "details": detailsFalse.map(
+                    value => {
+                        return {
+                            "subtitle": value.subtitle,
+                            "price": value.price
+                        }
+                    }
+                )
+            }
+        })
+        dispatch(editPriceList(editElement))
+        dispatch(editPriceList(element))
+        form.setFieldsValue({
+            details: editElement.details
+        });
+        // console.log({"edit": editElement})
+        // console.log({"send": element});
+    }
     return (
         <div>
             <Row justify={"center"}>
@@ -143,7 +188,7 @@ export default function PriceList() {
                     />
                 </Col>
                 <Col span={20}>
-                    <Row justify={"center"}>
+                    <Row justify={"space-between"} style={{marginLeft: "10%"}}>
                         <Col span={18}>
                             <Form
                                 form={form}
@@ -160,37 +205,53 @@ export default function PriceList() {
                                                 {
                                                     activeTitle &&
                                                     <Row style={{marginBottom: "20px"}} justify={"space-between"}>
-                                                        <Col span={10}>
-                                                            <Title level={5}>
+                                                        <Col span={mainColSpanValues.checkbox}/>
+                                                        <Col span={mainColSpanValues.operation}>
+                                                            <Text>
                                                                 Операція
-                                                            </Title>
+                                                            </Text>
                                                         </Col>
-                                                        <Col span={2}>
-                                                            <Title level={5}>
+                                                        <Col span={mainColSpanValues.price}>
+                                                            <Text>
                                                                 Ціна, грн
-                                                            </Title>
+                                                            </Text>
                                                         </Col>
-                                                        <Col span={3}/>
+                                                        <Col span={mainColSpanValues.button}>
+                                                            <Button
+                                                                onClick={() => showModal(setIsModalTransferFieldsVisible)}>
+                                                                Перенести поля
+                                                            </Button>
+                                                        </Col>
                                                     </Row>
                                                 }
                                                 {fields.map((field, index) => (
-                                                    <Row className="activeOperation" key={field.key} justify={"space-between"}>
-                                                        <Col span={10}>
+                                                    <Row key={field.key}
+                                                         justify={"space-between"}>
+                                                        <Col span={mainColSpanValues.checkbox}>
+                                                            <Form.Item
+                                                                name={[index, "status"]}
+                                                                valuePropName="checked"
+                                                            >
+                                                                <Checkbox/>
+                                                            </Form.Item>
+                                                        </Col>
+                                                        <Col span={mainColSpanValues.operation}>
                                                             <Form.Item
                                                                 name={[index, "subtitle"]}
                                                                 rules={
                                                                     [
                                                                         {
                                                                             required: true,
-                                                                            message: 'Введіть групу!'
+                                                                            message: 'Введіть операцію!'
                                                                         }
                                                                     ]
                                                                 }
                                                             >
-                                                                <TextArea maxLength={180} autoSize={{minRows: 2, maxRows: 2}}/>
+                                                                <TextArea maxLength={180}
+                                                                          autoSize={{minRows: 2, maxRows: 2}}/>
                                                             </Form.Item>
                                                         </Col>
-                                                        <Col span={2}>
+                                                        <Col span={mainColSpanValues.price}>
                                                             <Form.Item
                                                                 name={[index, "price"]}
                                                                 rules={
@@ -210,7 +271,7 @@ export default function PriceList() {
                                                                 <InputNumber/>
                                                             </Form.Item>
                                                         </Col>
-                                                        <Col>
+                                                        <Col span={mainColSpanValues.button}>
                                                             {fields.length > 1 ? (
                                                                 <Button
                                                                     danger
@@ -219,7 +280,7 @@ export default function PriceList() {
                                                                 >
                                                                     Видалити поле
                                                                 </Button>
-                                                            ) : <Col span={3}/>}
+                                                            ) : <Col span={mainColSpanValues.button}/>}
                                                         </Col>
                                                     </Row>
                                                 ))}
@@ -239,8 +300,6 @@ export default function PriceList() {
                                 </Form.List>
                                 <Row justify={"space-between"} style={{marginBottom: "30px"}}>
                                     <Button
-                                        type="dashed"
-                                        icon={<PlusOutlined/>}
                                         onClick={() => showModal(setIsModalAddVisible)}>
                                         Додати групу
                                     </Button>
@@ -258,17 +317,17 @@ export default function PriceList() {
                                             >
                                                 Видалити групу
                                             </Button>
+                                            <Form.Item>
+                                                <Button
+                                                    type="primary"
+                                                    htmlType="submit"
+                                                >
+                                                    Зберегти
+                                                </Button>
+                                            </Form.Item>
                                         </>
                                     }
                                 </Row>
-                                <Form.Item>
-                                    <Button
-                                        type="primary"
-                                        htmlType="submit"
-                                    >
-                                        Зберегти
-                                    </Button>
-                                </Form.Item>
                             </Form>
                             <Modal
                                 title="Редагувати групу"
@@ -332,6 +391,54 @@ export default function PriceList() {
                                         rules={validators}
                                     >
                                         <Input placeholder="Введіть групу"/>
+                                    </Form.Item>
+                                </Form>
+                            </Modal>
+                            <Modal
+                                title="Перенести поля"
+                                destroyOnClose={true}
+                                visible={isModalTransferFieldsVisible}
+                                footer={
+                                    <Button
+                                        key={"addOk"}
+                                        onClick={() => submitGroupNameForm(transferFieldsForm, setIsModalTransferFieldsVisible)}
+                                        type={"primary"}
+                                    >
+                                        Підтвердити
+                                    </Button>
+                                }
+                                onOk={() => submitGroupNameForm(transferFieldsForm, setIsModalTransferFieldsVisible)}
+                                onCancel={() => handleCancel(setIsModalTransferFieldsVisible)}
+                            >
+                                <Form
+                                    form={transferFieldsForm}
+                                    name={"transferFields"}
+                                    requiredMark={false}
+                                    preserve={false}
+                                    onFinish={returnCheckedItems}
+                                >
+                                    <Form.Item
+                                        name="title"
+                                        rules={[
+                                            {
+                                                required: true,
+                                                message: "Виберіть групу!"
+                                            }
+                                        ]}
+                                    >
+                                        <Select placeholder="Виберіть групу">
+                                            {
+                                                priceList.map(item => {
+                                                    return item.title !== activeTitle &&
+                                                        <Option
+                                                            key={item.title}
+                                                            value={item.title}
+                                                        >
+                                                            {item.title}
+                                                        </Option>
+                                                })
+                                            }
+                                        </Select>
                                     </Form.Item>
                                 </Form>
                             </Modal>

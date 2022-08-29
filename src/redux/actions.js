@@ -28,7 +28,16 @@ export function editPriceList(priceList) {
             .request({
                 method: "PUT",
                 url: URL + '/priceList/' + priceList.id,
-                data: priceList
+                data: {
+                    "id": priceList.id,
+                    "title": priceList.title,
+                    "details": priceList.details.map(details => {
+                        return {
+                            "subtitle": details.subtitle,
+                            "price": details.price
+                        }
+                    })
+                }
             })
             .then(() => {
                 dispatch({type: EDIT_PRICE_LIST, payload: priceList})
@@ -47,7 +56,15 @@ export function createPriceList(priceList) {
             .request({
                 method: "POST",
                 url: URL + "/priceList",
-                data: priceList
+                data: {
+                    "title": priceList.title,
+                    "details": priceList.details.map(details => {
+                        return {
+                            "subtitle": details.subtitle,
+                            "price": details.price
+                        }
+                    })
+                }
             })
             .then(response => {
                 dispatch({type: CREATE_PRICE_LIST, payload: response.data});
