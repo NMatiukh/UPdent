@@ -99,6 +99,7 @@ export default function PriceList() {
             okType: 'danger',
             okText: 'Так',
             cancelText: 'Ні',
+            centered: true,
             onOk() {
                 deletePriceListItem();
             },
@@ -340,6 +341,7 @@ export default function PriceList() {
                                 title="Редагувати групу"
                                 visible={isModalEditVisible}
                                 destroyOnClose={true}
+                                centered
                                 footer={
                                     <Button
                                         key={"editOk"}
@@ -371,6 +373,7 @@ export default function PriceList() {
                             </Modal>
                             <Modal
                                 title="Додати групу"
+                                centered
                                 destroyOnClose={true}
                                 visible={isModalAddVisible}
                                 footer={
@@ -403,6 +406,7 @@ export default function PriceList() {
                             </Modal>
                             <Modal
                                 title="Перенести поля"
+                                centered
                                 destroyOnClose={true}
                                 visible={isModalTransferFieldsVisible}
                                 footer={
