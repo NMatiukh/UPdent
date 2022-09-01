@@ -1,13 +1,13 @@
 import {
     Button,
     Checkbox,
-    Col, Drawer, Form,
+    Col, Divider, Drawer, Form,
     Input,
     InputNumber,
     Menu,
     Modal,
     Row,
-    Select,
+    Select, Table,
     Typography
 } from "antd";
 import {ExclamationCircleOutlined, PlusOutlined} from "@ant-design/icons";
@@ -73,6 +73,22 @@ export default function PriceList() {
         dispatch(getPriceList())
     }, [dispatch])
 
+    const massDelete = () => {
+        let detailsFalse = form.getFieldsValue().details.filter(value => !value.status);
+        let element = Object.assign({}, priceList.filter(item => item.title === activeTitle)[0]);
+        element.details = detailsFalse.map(
+            value => {
+                return {
+                    "subtitle": value.subtitle,
+                    "price": value.price
+                }
+            }
+        )
+        dispatch(editPriceList(element))
+        form.setFieldsValue({
+            details: element.details
+        });
+    }
     const showDrawer = () => {
         setIsVisibleDrawer(true);
     };
@@ -456,41 +472,84 @@ export default function PriceList() {
                                     </Form.Item>
                                 </Form>
                             </Modal>
-                            <Drawer placment={'right'} onClose={onCloseDrawer} visible={isVisibleDrawer}>
-                                <Row justify={"space-between"} style={{marginBottom: "30px"}}>
-                                    <Button
-                                        onClick={() => showModal(setIsModalAddVisible)}>
-                                        Додати групу
-                                    </Button>
-                                    {
-                                        activeTitle && <>
+                            <Drawer
+                                title={"Редагувати"}
+                                placment={'right'}
+                                onClose={onCloseDrawer}
+                                visible={isVisibleDrawer}
+                            >
+                                <table style={{width: "100%"}}>
+                                    <thead>
+                                    <tr>
+                                        <td style={{textAlign: "center"}}>
+                                            Групи
+                                        </td>
+                                        <td style={{textAlign: "center"}}>
+                                            Поля
+                                        </td>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr>
+                                        <td>
                                             <Button
+                                                type={"link"}
+                                                style={{width: '100%'}}
+                                                onClick={() => showModal(setIsModalAddVisible)}>
+                                                Додати групу
+                                            </Button>
+                                        </td>
+                                        <td>
+                                            <Button
+                                                type={"link"}
+                                                style={{width: '100%'}}
+                                                onClick={() => showModal(setIsModalTransferFieldsVisible)}>
+                                                Перенести поля
+                                            </Button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <Button
+                                                type={"link"}
+                                                style={{width: '100%'}}
                                                 onClick={() => showModal(setIsModalEditVisible)}
                                             >
                                                 Редагувати групу
                                             </Button>
+                                        </td>
+                                        <td>
                                             <Button
+                                                type={"link"}
+                                                style={{width: '100%'}}
+                                                danger
+                                                onClick={massDelete}
+                                            >
+                                                Видалити поля
+                                            </Button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <Button
+                                                type={"link"}
                                                 onClick={showPromiseConfirm}
                                                 danger
-                                                type={"primary"}
+                                                style={{width: '100%'}}
                                             >
                                                 Видалити групу
                                             </Button>
-                                            <Button
-                                                onClick={() => showModal(setIsModalTransferFieldsVisible)}>
-                                                Перенести поля
-                                            </Button>
-                                            <Form.Item>
-                                                <Button
-                                                    type="primary"
-                                                    htmlType="submit"
-                                                >
-                                                    Зберегти
-                                                </Button>
-                                            </Form.Item>
-                                        </>
-                                    }
-                                </Row>
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                                <Button
+                                    type="primary"
+                                    htmlType="submit"
+                                    style={{width: '100%', marginTop: "20px"}}
+                                >
+                                    Зберегти
+                                </Button>
                             </Drawer>
                         </Col>
                     </Row>
