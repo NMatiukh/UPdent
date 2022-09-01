@@ -30,9 +30,9 @@ const {Title, Text} = Typography;
 
 const mainColSpanValues = {
     "checkbox": 1,
-    "operation": 8,
-    "price": 3,
-    "button": 4
+    "operation": 12,
+    "price": 2,
+    "button": 6
 }
 
 export default function PriceList() {
@@ -48,6 +48,7 @@ export default function PriceList() {
     const [isVisibleDrawer, setIsVisibleDrawer] = useState(false);
 
     const [activeTitle, setActiveTitle] = useState('')
+    const [activeBox, setActiveBox] = useState(false)
 
     const validators = [
         {
@@ -201,11 +202,20 @@ export default function PriceList() {
         form.setFieldsValue({
             details: editElement.details
         });
-        // console.log({"edit": editElement})
-        // console.log({"send": element});
     }
+
+    function submitMainForm() {
+        form.submit();
+    }
+
+    function changeActiveBox() {
+        if (form.getFieldsValue().details.filter(value => value.status).length > 0){
+            setActiveBox(true)
+        }else setActiveBox(false)
+    }
+
     return (
-        <div>
+        <div onClick={()=>{activeTitle && changeActiveBox()}} style={{margin: "0 10%"}}>
             <Row justify={"center"}>
                 <Title>Прайс-лист</Title>
             </Row>
@@ -235,8 +245,8 @@ export default function PriceList() {
                     </InfiniteScroll>
                 </Col>
                 <Col span={20}>
-                    <Row justify={"space-between"} style={{marginLeft: "10%"}}>
-                        <Col span={18}>
+                    <Row justify={"space-between"} style={{marginLeft: "6%"}}>
+                        <Col span={24}>
                             <Form
                                 form={form}
                                 name={"editPriceListForTitle"}
@@ -249,27 +259,30 @@ export default function PriceList() {
                                     {(fields, {add, remove}) => {
                                         return (
                                             <>
-                                                {
-                                                    activeTitle &&
-                                                    <Row style={{marginBottom: "20px"}} justify={"space-between"}>
-                                                        <Col span={mainColSpanValues.checkbox}/>
-                                                        <Col span={mainColSpanValues.operation}>
+                                                <Row style={{marginBottom: "20px"}} justify={"space-between"}>
+                                                    <Col span={mainColSpanValues.checkbox}/>
+                                                    <Col span={mainColSpanValues.operation}>
+                                                        {
+                                                            activeTitle &&
                                                             <Text>
                                                                 Операція
                                                             </Text>
-                                                        </Col>
-                                                        <Col span={mainColSpanValues.price}>
+                                                        }
+                                                    </Col>
+                                                    <Col span={mainColSpanValues.price}>
+                                                        {
+                                                            activeTitle &&
                                                             <Text>
                                                                 Ціна, грн
                                                             </Text>
-                                                        </Col>
-                                                        <Col span={mainColSpanValues.button}>
-                                                            <Button onClick={showDrawer}>
-                                                                Open
-                                                            </Button>
-                                                        </Col>
-                                                    </Row>
-                                                }
+                                                        }
+                                                    </Col>
+                                                    <Col span={mainColSpanValues.button}>
+                                                        <Button type={"primary"} onClick={showDrawer}>
+                                                            Редагувати...
+                                                        </Button>
+                                                    </Col>
+                                                </Row>
                                                 <div
                                                     style={{
                                                         maxHeight: ((80 * document.documentElement.clientHeight) / 100),
@@ -287,7 +300,7 @@ export default function PriceList() {
                                                                         name={[index, "status"]}
                                                                         valuePropName="checked"
                                                                     >
-                                                                        <Checkbox/>
+                                                                        <Checkbox />
                                                                     </Form.Item>
                                                                 </Col>
                                                                 <Col span={mainColSpanValues.operation}>
@@ -501,6 +514,7 @@ export default function PriceList() {
                                         </td>
                                         <td>
                                             <Button
+                                                disabled={!activeTitle || !activeBox}
                                                 type={"link"}
                                                 style={{width: '100%'}}
                                                 onClick={() => showModal(setIsModalTransferFieldsVisible)}>
@@ -511,6 +525,7 @@ export default function PriceList() {
                                     <tr>
                                         <td>
                                             <Button
+                                                disabled={!activeTitle}
                                                 type={"link"}
                                                 style={{width: '100%'}}
                                                 onClick={() => showModal(setIsModalEditVisible)}
@@ -524,6 +539,7 @@ export default function PriceList() {
                                                 style={{width: '100%'}}
                                                 danger
                                                 onClick={massDelete}
+                                                disabled={!activeTitle || !activeBox}
                                             >
                                                 Видалити поля
                                             </Button>
@@ -536,6 +552,7 @@ export default function PriceList() {
                                                 onClick={showPromiseConfirm}
                                                 danger
                                                 style={{width: '100%'}}
+                                                disabled={!activeTitle}
                                             >
                                                 Видалити групу
                                             </Button>
@@ -547,6 +564,8 @@ export default function PriceList() {
                                     type="primary"
                                     htmlType="submit"
                                     style={{width: '100%', marginTop: "20px"}}
+                                    onClick={submitMainForm}
+                                    disabled={!activeTitle}
                                 >
                                     Зберегти
                                 </Button>
