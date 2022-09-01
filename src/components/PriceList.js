@@ -129,7 +129,7 @@ export default function PriceList() {
     }
     const showPromiseConfirmForFields = () => {
         confirm({
-            title: `Ви хочете видалити вибранні поля?`,
+            title: `Ви хочете видалити вибрані поля?`,
             icon: <ExclamationCircleOutlined/>,
             okType: 'danger',
             okText: 'Так',
