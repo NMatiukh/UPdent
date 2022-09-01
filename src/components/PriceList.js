@@ -1,14 +1,13 @@
 import {
     Button,
     Checkbox,
-    Col, Divider, Drawer, Form,
+    Col, Drawer, Form,
     Input,
     InputNumber,
     Menu,
     Modal,
     Row,
-    Select, Table,
-    Typography
+    Select, Typography
 } from "antd";
 import {ExclamationCircleOutlined, PlusOutlined} from "@ant-design/icons";
 import {useDispatch, useSelector} from "react-redux";
@@ -128,6 +127,21 @@ export default function PriceList() {
             },
         });
     }
+    const showPromiseConfirmForFields = () => {
+        confirm({
+            title: `Ви хочете видалити вибранні поля?`,
+            icon: <ExclamationCircleOutlined/>,
+            okType: 'danger',
+            okText: 'Так',
+            cancelText: 'Ні',
+            centered: true,
+            onOk() {
+                massDelete();
+            },
+            onCancel() {
+            },
+        });
+    }
 
     const submitGroupNameForm = (activeForm, setIsModalVisible) => {
         activeForm.validateFields(['title'])
@@ -209,13 +223,15 @@ export default function PriceList() {
     }
 
     function changeActiveBox() {
-        if (form.getFieldsValue().details.filter(value => value.status).length > 0){
+        if (form.getFieldsValue().details.filter(value => value.status).length > 0) {
             setActiveBox(true)
-        }else setActiveBox(false)
+        } else setActiveBox(false)
     }
 
     return (
-        <div onClick={()=>{activeTitle && changeActiveBox()}} style={{margin: "0 10%"}}>
+        <div onClick={() => {
+            activeTitle && changeActiveBox()
+        }} style={{margin: "0 10%"}}>
             <Row justify={"center"}>
                 <Title>Прайс-лист</Title>
             </Row>
@@ -300,7 +316,7 @@ export default function PriceList() {
                                                                         name={[index, "status"]}
                                                                         valuePropName="checked"
                                                                     >
-                                                                        <Checkbox />
+                                                                        <Checkbox/>
                                                                     </Form.Item>
                                                                 </Col>
                                                                 <Col span={mainColSpanValues.operation}>
@@ -538,7 +554,7 @@ export default function PriceList() {
                                                 type={"link"}
                                                 style={{width: '100%'}}
                                                 danger
-                                                onClick={massDelete}
+                                                onClick={showPromiseConfirmForFields}
                                                 disabled={!activeTitle || !activeBox}
                                             >
                                                 Видалити поля
