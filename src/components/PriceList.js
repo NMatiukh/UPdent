@@ -260,8 +260,8 @@ export default function PriceList() {
                             mode="inline"
                             items={priceList.map(value => {
                                 return {
-                                    label: value.attributes.title_ua,
-                                    key: value.attributes.title_ua
+                                    label: value.title,
+                                    key: value.title
                                 }
                             })}
                             onClick={(item) => handleChange(item)}
