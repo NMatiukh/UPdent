@@ -7,7 +7,7 @@ import {
     Menu,
     Modal,
     Row,
-    Select, Typography
+    Select, Spin, Typography
 } from "antd";
 import {ExclamationCircleOutlined, PlusOutlined} from "@ant-design/icons";
 import {useDispatch, useSelector} from "react-redux";
@@ -223,9 +223,14 @@ export default function PriceList() {
     }
 
     function changeActiveBox() {
-        if (form.getFieldsValue().details.filter(value => value.status).length > 0) {
-            setActiveBox(true)
-        } else setActiveBox(false)
+        try {
+            if (form.getFieldsValue().details.filter(value => value.status).length > 0) {
+                setActiveBox(true)
+            } else setActiveBox(false)
+        } catch (e) {
+
+        }
+
     }
 
     return (
@@ -245,13 +250,18 @@ export default function PriceList() {
                 >
                     <InfiniteScroll
                         dataLength={priceList.length}
+                        hasMore={false}
+                        loader={<Spin/>}
+                        next={() => {
+                            console.log("this is the end of list")
+                        }}
                     >
                         <Menu
                             mode="inline"
                             items={priceList.map(value => {
                                 return {
-                                    label: value.title,
-                                    key: value.title
+                                    label: value.attributes.title_ua,
+                                    key: value.attributes.title_ua
                                 }
                             })}
                             onClick={(item) => handleChange(item)}
@@ -307,6 +317,11 @@ export default function PriceList() {
                                                 >
                                                     <InfiniteScroll
                                                         dataLength={fields.length}
+                                                        hasMore={false}
+                                                        loader={<Spin/>}
+                                                        next={() => {
+                                                            console.log("this is the end of list")
+                                                        }}
                                                     >
                                                         {fields.map((field, index) => (
                                                             <Row key={field.key}

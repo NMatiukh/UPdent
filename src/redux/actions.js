@@ -14,9 +14,10 @@ const URL = 'https://fake-server-app-nmatiukh.herokuapp.com';
 export function getPriceList() {
     return async dispatch => {
         axios
-            .get(URL + "/priceList")
+            .get("https://updent.com.ua/api/v1/price_sections")
             .then(response => {
-                dispatch({type: GET_PRICE_LIST, payload: response.data})
+                dispatch({type: GET_PRICE_LIST, payload: response.data.data})
+                console.log(response)
             })
     }
 }
