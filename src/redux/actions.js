@@ -9,15 +9,28 @@ import {
 import {message} from "antd";
 import axios from "axios";
 
-const URL = 'https://fake-server-app-nmatiukh.herokuapp.com';
+const URL = 'https://updent.com.ua/api/v1/price_sections/';
 
 export function getPriceList() {
     return async dispatch => {
         axios
-            .get("https://updent.com.ua/api/v1/price_sections")
+            .get(URL)
             .then(response => {
-                dispatch({type: GET_PRICE_LIST, payload: response.data.data})
-                console.log(response)
+                let priceList = response.data.data.map(value => {
+                    return {
+                        "id": value.id,
+                        "title": value.attributes.title_ua,
+                        "details": value.attributes.price_lines.map(details => {
+                            return {
+                                "subtitle": details.title_ua,
+                                "price": details.price_ua
+                            }
+                        })
+                    }
+                });
+
+                dispatch({type: GET_PRICE_LIST, payload: priceList})
+                console.log(priceList)
             })
     }
 }
@@ -28,16 +41,33 @@ export function editPriceList(priceList) {
         axios
             .request({
                 method: "PUT",
-                url: URL + '/priceList/' + priceList.id,
+                url: URL + priceList.id,
                 data: {
                     "id": priceList.id,
-                    "title": priceList.title,
-                    "details": priceList.details.map(details => {
-                        return {
-                            "subtitle": details.subtitle,
-                            "price": details.price
-                        }
-                    })
+                    "type": "price_section",
+                    "attributes": {
+                        "title_ua": priceList.title,
+                        "title_en": undefined,
+                        "title_pl": undefined,
+                        "priority": true,
+                        "visio": true,
+                        "price_lines": priceList.details.map(details => {
+                            return {
+                                "title_ua": details.subtitle,
+                                "title_en": undefined,
+                                "title_pl": undefined,
+                                "price_ua": details.price,
+                                "price_en": null,
+                                "price_pl": null,
+                                "currency_name_ua": null,
+                                "currency_name_en": null,
+                                "currency_name_pl": null,
+                                "priority": true,
+                                "visio": true,
+                                "updated_at": new Date().toDateString(),
+                            }
+                        })
+                    }
                 }
             })
             .then(() => {
@@ -56,24 +86,42 @@ export function createPriceList(priceList) {
         axios
             .request({
                 method: "POST",
-                url: URL + "/priceList",
+                url: URL,
                 data: {
-                    "title": priceList.title,
-                    "details": priceList.details.map(details => {
-                        return {
-                            "subtitle": details.subtitle,
-                            "price": details.price
-                        }
-                    })
+                    "type": "price_section",
+                    "attributes": {
+                        "title_ua": priceList.title,
+                        "title_en": undefined,
+                        "title_pl": undefined,
+                        "priority": true,
+                        "visio": true,
+                        "price_lines": priceList.details.map(details => {
+                            return {
+                                "title_ua": details.subtitle,
+                                "title_en": undefined,
+                                "title_pl": undefined,
+                                "price_ua": details.price,
+                                "price_en": null,
+                                "price_pl": null,
+                                "currency_name_ua": null,
+                                "currency_name_en": null,
+                                "currency_name_pl": null,
+                                "priority": true,
+                                "visio": true,
+                                "created_at": new Date().toDateString(),
+                            }
+                        })
+                    }
                 }
             })
             .then(response => {
                 dispatch({type: CREATE_PRICE_LIST, payload: response.data});
                 message.success(`"${priceList.title}" створено!`);
+                console.log(response.data)
             })
             .catch((error) => {
                 message.error('Помика! Не вдалось створити!');
-                console.log(error)
+                console.log(error.config.data)
             })
     }
 }
@@ -96,7 +144,7 @@ export function deletePriceList(priceList) {
     } else {
         return async dispatch => {
             axios
-                .delete(URL + "/priceList/" + priceList.id)
+                .delete(URL + priceList.id)
                 .then(() => {
                     message.success(`"${priceList.title}" видалено!`);
                     dispatch({type: DELETE_PRICE_LIST, payload: priceList})

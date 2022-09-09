@@ -240,6 +240,9 @@ export default function PriceList() {
             <Row justify={"center"}>
                 <Title>Прайс-лист</Title>
             </Row>
+            <Row style={{minHeight: "51px"}} justify={"center"}>
+                <Title level={2}>{activeTitle.toUpperCase()}</Title>
+            </Row>
             <Row justify={"space-between"}>
                 <Col
                     span={4}
@@ -260,8 +263,8 @@ export default function PriceList() {
                             mode="inline"
                             items={priceList.map(value => {
                                 return {
-                                    label: value.attributes.title_ua,
-                                    key: value.attributes.title_ua
+                                    label: value.title,
+                                    key: value.title
                                 }
                             })}
                             onClick={(item) => handleChange(item)}
