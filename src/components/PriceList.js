@@ -1,7 +1,7 @@
 import {
     Button,
     Checkbox,
-    Col, Drawer, Form,
+    Col, Empty, Form,
     Input,
     InputNumber,
     Menu,
@@ -9,19 +9,18 @@ import {
     Row,
     Select, Spin, Typography
 } from "antd";
-import {ExclamationCircleOutlined, PlusOutlined} from "@ant-design/icons";
+import {ExclamationCircleOutlined, DeleteOutlined} from "@ant-design/icons";
 import {useDispatch, useSelector} from "react-redux";
 import {
-    changePriceListTitle,
-    createPriceList,
-    deletePriceList,
-    editPriceList,
-    getPriceList, setPriceList
+    createField, createGroup, deleteField, deleteGroup,
+    editField, editGroup,
+    getPriceList
 } from "../redux/actions";
 import React, {useEffect, useState} from "react";
 import TextArea from "antd/es/input/TextArea";
 import InfiniteScroll from 'react-infinite-scroll-component';
 import './style/PriceList.css';
+import {message} from "antd";
 
 const {Option} = Select;
 const {confirm} = Modal;
@@ -37,21 +36,20 @@ const mainColSpanValues = {
 export default function PriceList() {
     const [form] = Form.useForm();
     const [addGroupNameForm] = Form.useForm();
-    const [editGroupNameForm] = Form.useForm();
     const [transferFieldsForm] = Form.useForm();
     const dispatch = useDispatch();
     const priceList = useSelector(state => state.priceList.priceList)
     const [isModalAddVisible, setIsModalAddVisible] = useState(false);
-    const [isModalEditVisible, setIsModalEditVisible] = useState(false);
     const [isModalTransferFieldsVisible, setIsModalTransferFieldsVisible] = useState(false);
-    const [isVisibleDrawer, setIsVisibleDrawer] = useState(false);
 
-    const [activeTitle, setActiveTitle] = useState('')
+    const [activeTitle, setActiveTitle] = useState(0)
     const [activeBox, setActiveBox] = useState(false)
+    const [priceListIsEditing, setPriceListIsEditing] = useState(false);
+    const [oneTransferField, setOneTransferField] = useState(0);
 
     const validators = [
         {
-            validator: (_, value) => priceList.filter(item => item.title.toLowerCase() === value.toLowerCase()).length ? Promise.reject(new Error('Дана група вже існує!')) : Promise.resolve()
+            validator: (_, value) => priceList.filter(item => item.titleUA.toLowerCase() === value.toLowerCase()).length ? Promise.reject(new Error('Дана група вже існує!')) : Promise.resolve()
 
         },
         {
@@ -73,29 +71,6 @@ export default function PriceList() {
         dispatch(getPriceList())
     }, [dispatch])
 
-    const massDelete = () => {
-        let detailsFalse = form.getFieldsValue().details.filter(value => !value.status);
-        let element = Object.assign({}, priceList.filter(item => item.title === activeTitle)[0]);
-        element.details = detailsFalse.map(
-            value => {
-                return {
-                    "subtitle": value.subtitle,
-                    "price": value.price
-                }
-            }
-        )
-        dispatch(editPriceList(element))
-        form.setFieldsValue({
-            details: element.details
-        });
-    }
-    const showDrawer = () => {
-        setIsVisibleDrawer(true);
-    };
-
-    const onCloseDrawer = () => {
-        setIsVisibleDrawer(false);
-    };
     const showModal = (setIsModalVisible) => {
         setIsModalVisible(true);
     };
@@ -106,45 +81,33 @@ export default function PriceList() {
         setIsModalVisible(false);
     };
     const handleChange = (value) => {
+        let obj = priceList.filter(item => item.id === parseInt(value.key))[0];
         form.setFieldsValue({
-            details: priceList.filter(item => item.title === value.key)[0].details,
+            titleUA: obj.titleUA,
+            titleEN: obj.titleEN,
+            titlePL: obj.titlePL,
+            details: obj.details,
         });
-        setActiveTitle(value.key)
+        setActiveTitle(parseInt(value.key))
     };
 
-    const showPromiseConfirm = () => {
+    const showPromiseConfirm = (someFunction, text) => {
         confirm({
-            title: `Ви хочете видалити групу?`,
+            title: `Ви хочете видалити ${text}?`,
             icon: <ExclamationCircleOutlined/>,
             okType: 'danger',
             okText: 'Так',
             cancelText: 'Ні',
             centered: true,
             onOk() {
-                deletePriceListItem();
+                someFunction();
             },
             onCancel() {
             },
         });
     }
-    const showPromiseConfirmForFields = () => {
-        confirm({
-            title: `Ви хочете видалити вибрані поля?`,
-            icon: <ExclamationCircleOutlined/>,
-            okType: 'danger',
-            okText: 'Так',
-            cancelText: 'Ні',
-            centered: true,
-            onOk() {
-                massDelete();
-            },
-            onCancel() {
-            },
-        });
-    }
-
     const submitGroupNameForm = (activeForm, setIsModalVisible) => {
-        activeForm.validateFields(['title'])
+        activeForm.validateFields(['titleUA'])
             .then(() => {
                 activeForm.submit();
                 handleOk(setIsModalVisible)
@@ -155,71 +118,69 @@ export default function PriceList() {
     }
 
     const onFinish = (values) => {
-        if ({...priceList.filter(item => item.title === activeTitle)[0], ...values}.id === undefined) {
-            dispatch(createPriceList({...{"title": activeTitle}, ...values}))
-        } else {
-            dispatch(editPriceList({...priceList.filter(item => item.title === activeTitle)[0], ...values}))
-        }
-    };
-    const deletePriceListItem = () => {
-        setActiveTitle('')
-        form.setFieldsValue({
-            details: []
+        dispatch(editGroup(values, activeTitle))
+        values.details.map(item => {
+            item.id ?
+                dispatch(editField(item, activeTitle))
+                :
+                dispatch(createField(item, activeTitle));
         })
-        dispatch(deletePriceList(priceList.filter(item => item.title === activeTitle)[0]))
-    }
+        dispatch(getPriceList())
+        message.success(`Виконано!`);
+        // console.log({...values, ...{id: activeTitle}})
+    };
     const createGroupName = (values) => {
-        dispatch(setPriceList({
-            "title": values.title,
-            "details": [{}]
-        }))
-        setActiveTitle(values.title)
+        dispatch(createGroup(values))
         form.setFieldsValue({
+            "titleUA": values.titleUA,
+            "titleEN": values.titleEN,
+            "titlePL": values.titlePL,
             details: [{}],
         });
-    }
-    const editGroupName = (values) => {
-        dispatch(changePriceListTitle({...priceList.filter(item => item.title === activeTitle)[0], ...values}))
-        setActiveTitle(values.title)
-        form.setFieldsValue({
-            title: values.title
-        });
+        dispatch(getPriceList());
     }
     const returnCheckedItems = () => {
         let detailsTrue = form.getFieldsValue().details.filter(value => value.status);
         let detailsFalse = form.getFieldsValue().details.filter(value => !value.status);
-
-        let element = Object.assign({}, priceList.filter(item => item.title === transferFieldsForm.getFieldValue('title'))[0]);
-        element.details = [...element.details, ...detailsTrue.map(
-            value => {
-                return {
-                    "subtitle": value.subtitle,
-                    "price": value.price
-                }
-            }
-        )
-        ]
-        let editElement = Object.assign({}, {
-            ...priceList.filter(value => value.title === activeTitle)[0], ...{
-                "details": detailsFalse.map(
-                    value => {
-                        return {
-                            "subtitle": value.subtitle,
-                            "price": value.price
-                        }
-                    }
-                )
-            }
+        let id;
+        priceList.map(value1 => {
+            value1.titleUA === transferFieldsForm.getFieldValue('title') && (id = value1.id)
         })
-        dispatch(editPriceList(editElement))
-        dispatch(editPriceList(element))
+        detailsTrue.map(value => dispatch(editField(value, id)))
         form.setFieldsValue({
-            details: editElement.details
-        });
+            details: detailsFalse
+        })
+        dispatch(getPriceList());
+        message.success(`Перенесено поля!`);
+    }
+    const massDelete = () => {
+        let detailsTrue = form.getFieldsValue().details.filter(value => value.status);
+        let detailsFalse = form.getFieldsValue().details.filter(value => !value.status);
+        detailsTrue.map(value => dispatch(deleteField(value)))
+        form.setFieldsValue({
+            details: detailsFalse
+        })
+        dispatch(getPriceList());
+        message.success(`Видалено!`);
     }
 
-    function submitMainForm() {
-        form.submit();
+    function transferField(key) {
+        let id;
+        priceList.map(value1 => {
+            value1.titleUA === transferFieldsForm.getFieldValue('title') && (id = value1.id)
+        })
+        let field = form.getFieldsValue().details[key];
+
+        let valueDetails = priceList.filter(value => value.id === activeTitle)
+        form.setFieldsValue({
+            titleUA: valueDetails[0].titleUA,
+            titleEN: valueDetails[0].titleEN,
+            titlePL: valueDetails[0].titlePL,
+            details: valueDetails[0].details.filter(value => value.id !== field.id),
+        });
+        dispatch(editField(field, id))
+        dispatch(getPriceList());
+        message.success(`Перенесено поле!`);
     }
 
     function changeActiveBox() {
@@ -230,15 +191,19 @@ export default function PriceList() {
         } catch (e) {
 
         }
-
     }
 
     return (
         <div onClick={() => {
             activeTitle && changeActiveBox()
-        }} style={{margin: "0 10%"}}>
-            <Row justify={"center"}>
+        }} style={{margin: "0 10%", padding: "20px 0"}}>
+            <Row justify={"space-between"}>
                 <Title>Прайс-лист</Title>
+                <Button type={"primary"} onClick={() => {
+                    setPriceListIsEditing(!priceListIsEditing)
+                }}>
+                    {priceListIsEditing ? "Переглядати" : "Редагувати"}
+                </Button>
             </Row>
             <Row justify={"space-between"}>
                 <Col
@@ -260,351 +225,411 @@ export default function PriceList() {
                             mode="inline"
                             items={priceList.map(value => {
                                 return {
-                                    label: value.title,
-                                    key: value.title
+                                    label: <Row justify={"space-between"} align={"middle"}>
+                                        {value.titleUA}
+                                        {
+                                            priceListIsEditing && <DeleteOutlined onClick={() => {
+                                                showPromiseConfirm(() => {
+                                                    dispatch(deleteGroup(value))
+                                                    setActiveTitle(0)
+                                                    form.setFieldsValue({
+                                                        details: []
+                                                    })
+                                                }, 'групу')
+                                            }}/>
+                                        }
+                                    </Row>,
+                                    key: value.id
                                 }
                             })}
                             onClick={(item) => handleChange(item)}
                             selectable={[activeTitle]}
                             selectedKeys={[activeTitle]}
+                            style={{
+                                borderBottom: "1px solid rgba(217, 217, 217, 1)",
+                                margin: "20px 0"
+                            }}
                         />
                     </InfiniteScroll>
+                    {
+                        priceListIsEditing &&
+                        <Button onClick={() => showModal(setIsModalAddVisible)}>Додати групу</Button>
+                    }
                 </Col>
                 <Col span={20}>
                     <Row justify={"space-between"} style={{marginLeft: "6%"}}>
-                        <Col span={24}>
-                            <Form
-                                form={form}
-                                name={"editPriceListForTitle"}
-                                onFinish={onFinish}
-                                requiredMark={false}
-                            >
-                                <Form.List
-                                    name={'details'}
-                                >
-                                    {(fields, {add, remove}) => {
-                                        return (
-                                            <>
-                                                <Row style={{marginBottom: "20px"}} justify={"space-between"}>
-                                                    <Col span={mainColSpanValues.checkbox}/>
-                                                    <Col span={mainColSpanValues.operation}>
-                                                        {
-                                                            activeTitle &&
-                                                            <Text>
-                                                                Операція
-                                                            </Text>
-                                                        }
-                                                    </Col>
-                                                    <Col span={mainColSpanValues.price}>
-                                                        {
-                                                            activeTitle &&
-                                                            <Text>
-                                                                Ціна, грн
-                                                            </Text>
-                                                        }
-                                                    </Col>
-                                                    <Col span={mainColSpanValues.button}>
-                                                        <Button type={"primary"} onClick={showDrawer}>
-                                                            Редагувати...
-                                                        </Button>
-                                                    </Col>
-                                                </Row>
-                                                <div
-                                                    style={{
-                                                        maxHeight: ((80 * document.documentElement.clientHeight) / 100),
-                                                        overflow: 'auto',
-                                                    }}
+                        {
+                            activeTitle ?
+                                <Col span={24}>
+
+                                    <Form
+                                        form={form}
+                                        name={"editPriceListForTitle"}
+                                        onFinish={onFinish}
+                                        requiredMark={false}
+                                        disabled={!priceListIsEditing}
+                                        onChange={changeActiveBox}
+                                    >
+                                        <Row justify={"space-between"} style={{width: "70%"}}>
+                                            <Col span={6}>
+                                                <Form.Item
+                                                    label={"ua"}
+                                                    name={"titleUA"}
+                                                    rules={
+                                                        [
+                                                            {
+                                                                required: true,
+                                                                message: 'Введіть операцію!'
+                                                            }
+                                                        ]
+                                                    }
                                                 >
-                                                    <InfiniteScroll
-                                                        dataLength={fields.length}
-                                                        hasMore={false}
-                                                        loader={<Spin/>}
-                                                        next={() => {
-                                                            console.log("this is the end of list")
-                                                        }}
-                                                    >
-                                                        {fields.map((field, index) => (
-                                                            <Row key={field.key}
-                                                                 justify={"space-between"}>
-                                                                <Col span={mainColSpanValues.checkbox}>
-                                                                    <Form.Item
-                                                                        name={[index, "status"]}
-                                                                        valuePropName="checked"
-                                                                    >
-                                                                        <Checkbox/>
-                                                                    </Form.Item>
-                                                                </Col>
-                                                                <Col span={mainColSpanValues.operation}>
-                                                                    <Form.Item
-                                                                        name={[index, "subtitle"]}
-                                                                        rules={
-                                                                            [
-                                                                                {
-                                                                                    required: true,
-                                                                                    message: 'Введіть операцію!'
-                                                                                }
-                                                                            ]
-                                                                        }
-                                                                    >
-                                                                        <TextArea maxLength={180}
-                                                                                  autoSize={{minRows: 2, maxRows: 2}}/>
-                                                                    </Form.Item>
-                                                                </Col>
-                                                                <Col span={mainColSpanValues.price}>
-                                                                    <Form.Item
-                                                                        name={[index, "price"]}
-                                                                        rules={
-                                                                            [
-                                                                                {
-                                                                                    required: true,
-                                                                                    message: 'Введіть ціну!'
-                                                                                },
-                                                                                {
-                                                                                    type: 'number',
-                                                                                    min: 0,
-                                                                                    message: 'Введіть ціну більшу 0!'
-                                                                                },
-                                                                            ]
-                                                                        }
-                                                                    >
-                                                                        <InputNumber/>
-                                                                    </Form.Item>
-                                                                </Col>
-                                                                <Col span={mainColSpanValues.button}>
-                                                                    {fields.length > 1 ? (
-                                                                        <Button
-                                                                            danger
-                                                                            type="dashed"
-                                                                            onClick={() => remove(field.name)}
-                                                                        >
-                                                                            Видалити поле
-                                                                        </Button>
-                                                                    ) : <Col span={mainColSpanValues.button}/>}
-                                                                </Col>
-                                                            </Row>
-                                                        ))}
-                                                    </InfiniteScroll>
-                                                </div>
-                                                <Form.Item>
-                                                    <Button
-                                                        disabled={!activeTitle}
-                                                        type="dashed"
-                                                        onClick={() => add()}
-                                                        style={{width: "100%"}}
-                                                    >
-                                                        <PlusOutlined/> Додати поле
-                                                    </Button>
+                                                    <TextArea maxLength={71}
+                                                              autoSize={{minRows: 1, maxRows: 1}}
+                                                              style={{
+                                                                  background: "white",
+                                                                  color: "black"
+                                                              }}
+                                                    />
                                                 </Form.Item>
-                                            </>
-                                        );
-                                    }}
-                                </Form.List>
-                            </Form>
-                            <Modal
-                                title="Редагувати групу"
-                                visible={isModalEditVisible}
-                                destroyOnClose={true}
-                                centered
-                                footer={
-                                    <Button
-                                        key={"editOk"}
-                                        onClick={() => submitGroupNameForm(editGroupNameForm, setIsModalEditVisible)}
-                                        type={"primary"}
-                                    >
-                                        Редагувати
-                                    </Button>
-                                }
-                                onOk={() => submitGroupNameForm(editGroupNameForm, setIsModalEditVisible)}
-                                onCancel={() => handleCancel(setIsModalEditVisible)}
-                            >
-                                <Form
-                                    form={editGroupNameForm}
-                                    name={"editGroupName"}
-                                    requiredMark={false}
-                                    preserve={false}
-                                    onFinish={editGroupName}
-                                >
-                                    <Form.Item
-                                        name="title"
-                                        hasFeedback
-                                        initialValue={activeTitle}
-                                        rules={validators}
-                                    >
-                                        <Input placeholder="Введіть групу"/>
-                                    </Form.Item>
-                                </Form>
-                            </Modal>
-                            <Modal
-                                title="Додати групу"
-                                centered
-                                destroyOnClose={true}
-                                visible={isModalAddVisible}
-                                footer={
-                                    <Button
-                                        key={"addOk"}
-                                        onClick={() => submitGroupNameForm(addGroupNameForm, setIsModalAddVisible)}
-                                        type={"primary"}
-                                    >
-                                        Підтвердити
-                                    </Button>
-                                }
-                                onOk={() => submitGroupNameForm(addGroupNameForm, setIsModalAddVisible)}
-                                onCancel={() => handleCancel(setIsModalAddVisible)}
-                            >
-                                <Form
-                                    form={addGroupNameForm}
-                                    name={"createGroupName"}
-                                    requiredMark={false}
-                                    preserve={false}
-                                    onFinish={createGroupName}
-                                >
-                                    <Form.Item
-                                        name="title"
-                                        hasFeedback
-                                        rules={validators}
-                                    >
-                                        <Input placeholder="Введіть групу"/>
-                                    </Form.Item>
-                                </Form>
-                            </Modal>
-                            <Modal
-                                title="Перенести поля"
-                                centered
-                                destroyOnClose={true}
-                                visible={isModalTransferFieldsVisible}
-                                footer={
-                                    <Button
-                                        key={"addOk"}
-                                        onClick={() => submitGroupNameForm(transferFieldsForm, setIsModalTransferFieldsVisible)}
-                                        type={"primary"}
-                                    >
-                                        Підтвердити
-                                    </Button>
-                                }
-                                onOk={() => submitGroupNameForm(transferFieldsForm, setIsModalTransferFieldsVisible)}
-                                onCancel={() => handleCancel(setIsModalTransferFieldsVisible)}
-                            >
-                                <Form
-                                    form={transferFieldsForm}
-                                    name={"transferFields"}
-                                    requiredMark={false}
-                                    preserve={false}
-                                    onFinish={returnCheckedItems}
-                                >
-                                    <Form.Item
-                                        name="title"
-                                        rules={[
-                                            {
-                                                required: true,
-                                                message: "Виберіть групу!"
-                                            }
-                                        ]}
-                                    >
-                                        <Select placeholder="Виберіть групу">
-                                            {
-                                                priceList.map(item => {
-                                                    return item.title !== activeTitle &&
-                                                        <Option
-                                                            key={item.title}
-                                                            value={item.title}
+                                            </Col>
+                                            <Col span={6}>
+                                                <Form.Item
+                                                    label={"en"}
+                                                    name={"titleEN"}
+                                                >
+                                                    <TextArea maxLength={71}
+                                                              autoSize={{minRows: 1, maxRows: 1}}
+                                                              style={{
+                                                                  background: "white",
+                                                                  color: "black"
+                                                              }}
+                                                    />
+                                                </Form.Item>
+                                            </Col>
+                                            <Col span={6}>
+                                                <Form.Item
+                                                    label={"pl"}
+                                                    name={"titlePL"}
+                                                >
+                                                    <TextArea maxLength={71}
+                                                              autoSize={{minRows: 1, maxRows: 1}}
+                                                              style={{
+                                                                  background: "white",
+                                                                  color: "black"
+                                                              }}
+                                                    />
+                                                </Form.Item>
+                                            </Col>
+                                        </Row>
+                                        <Form.List
+                                            name={'details'}
+                                        >
+                                            {(fields, {add, remove}) => {
+                                                return (
+                                                    <>
+                                                        <Row style={{marginBottom: "20px"}} justify={"space-between"}>
+                                                            <Col span={mainColSpanValues.checkbox}/>
+                                                            <Col span={mainColSpanValues.operation}>
+                                                                {
+                                                                    activeTitle &&
+                                                                    <Text>
+                                                                        Операція
+                                                                    </Text>
+                                                                }
+                                                            </Col>
+                                                            <Col span={mainColSpanValues.price}>
+                                                                {
+                                                                    activeTitle &&
+                                                                    <Text>
+                                                                        Ціна, грн
+                                                                    </Text>
+                                                                }
+                                                            </Col>
+                                                            <Col span={mainColSpanValues.button}>
+
+                                                            </Col>
+                                                        </Row>
+                                                        <div
+                                                            style={{
+                                                                maxHeight: ((64 * document.documentElement.clientHeight) / 100),
+                                                                overflow: 'auto',
+                                                                marginBottom: "20px",
+                                                                borderBottom: "1px solid rgba(217, 217, 217, 1)"
+                                                            }}
                                                         >
-                                                            {item.title}
-                                                        </Option>
-                                                })
-                                            }
-                                        </Select>
-                                    </Form.Item>
-                                </Form>
-                            </Modal>
-                            <Drawer
-                                title={"Редагувати"}
-                                placment={'right'}
-                                onClose={onCloseDrawer}
-                                visible={isVisibleDrawer}
-                            >
-                                <table style={{width: "100%"}}>
-                                    <thead>
-                                    <tr>
-                                        <td style={{textAlign: "center"}}>
-                                            Групи
-                                        </td>
-                                        <td style={{textAlign: "center"}}>
-                                            Поля
-                                        </td>
-                                    </tr>
-                                    </thead>
-                                    <tbody>
-                                    <tr>
-                                        <td>
+                                                            <InfiniteScroll
+                                                                dataLength={fields.length}
+                                                                hasMore={false}
+                                                                loader={<Spin/>}
+                                                                next={() => {
+                                                                    console.log("this is the end of list")
+                                                                }}
+                                                            >
+                                                                {fields.map((field, index) => (
+                                                                    <Row key={field.key}
+                                                                         justify={"space-between"}
+                                                                         style={{marginBottom: "20px"}}
+                                                                    >
+                                                                        <Col span={mainColSpanValues.checkbox}>
+                                                                            {
+                                                                                priceListIsEditing &&
+                                                                                <Form.Item
+                                                                                    name={[index, "status"]}
+                                                                                    valuePropName="checked"
+                                                                                >
+                                                                                    <Checkbox/>
+                                                                                </Form.Item>
+                                                                            }
+                                                                        </Col>
+                                                                        <Col span={mainColSpanValues.operation}>
+                                                                            <Form.Item
+                                                                                label={"ua"}
+                                                                                name={[index, "subtitleUA"]}
+                                                                                rules={
+                                                                                    [
+                                                                                        {
+                                                                                            required: true,
+                                                                                            message: 'Введіть операцію!'
+                                                                                        }
+                                                                                    ]
+                                                                                }
+                                                                            >
+                                                                                <TextArea maxLength={71}
+                                                                                          autoSize={{
+                                                                                              minRows: 1,
+                                                                                              maxRows: 1
+                                                                                          }}
+                                                                                          style={{
+                                                                                              background: "white",
+                                                                                              color: "black"
+                                                                                          }}
+                                                                                />
+                                                                            </Form.Item>
+                                                                            <Form.Item
+                                                                                label={"en"}
+                                                                                name={[index, "subtitleEN"]}
+                                                                            >
+                                                                                <TextArea maxLength={71}
+                                                                                          autoSize={{
+                                                                                              minRows: 1,
+                                                                                              maxRows: 1
+                                                                                          }}
+                                                                                          style={{
+                                                                                              background: "white",
+                                                                                              color: "black"
+                                                                                          }}
+                                                                                />
+                                                                            </Form.Item>
+                                                                            <Form.Item
+                                                                                label={"pl"}
+                                                                                name={[index, "subtitlePL"]}
+                                                                            >
+                                                                                <TextArea maxLength={71}
+                                                                                          autoSize={{
+                                                                                              minRows: 1,
+                                                                                              maxRows: 1
+                                                                                          }}
+                                                                                          style={{
+                                                                                              background: "white",
+                                                                                              color: "black"
+                                                                                          }}
+                                                                                />
+                                                                            </Form.Item>
+                                                                        </Col>
+                                                                        <Col span={mainColSpanValues.price}>
+                                                                            <Form.Item
+                                                                                name={[index, "price"]}
+                                                                                rules={
+                                                                                    [
+                                                                                        {
+                                                                                            required: true,
+                                                                                            message: 'Введіть ціну!'
+                                                                                        },
+                                                                                        {
+                                                                                            type: 'number',
+                                                                                            min: 0,
+                                                                                            message: 'Введіть ціну більшу 0!'
+                                                                                        },
+                                                                                    ]
+                                                                                }
+                                                                            >
+                                                                                <InputNumber style={{
+                                                                                    background: "white",
+                                                                                    color: "black"
+                                                                                }}/>
+                                                                            </Form.Item>
+                                                                        </Col>
+                                                                        <Col span={mainColSpanValues.button}>
+                                                                            {
+                                                                                priceListIsEditing &&
+                                                                                <Row justify={"space-evenly"}>
+                                                                                    <Button
+                                                                                        type={"dashed"}
+                                                                                        onClick={() => {
+                                                                                            setOneTransferField(field.key)
+                                                                                            showModal(setIsModalTransferFieldsVisible)
+                                                                                        }
+                                                                                        }
+                                                                                    >Перенести</Button>
+                                                                                    <Button
+                                                                                        danger
+                                                                                        type={"primary"}
+                                                                                        onClick={() => showPromiseConfirm(() => {
+                                                                                            dispatch(deleteField(form.getFieldsValue().details[field.key]))
+                                                                                            remove(field.name)
+                                                                                        }, 'поле')}
+                                                                                    >
+                                                                                        Видалити
+                                                                                    </Button>
+                                                                                </Row>
+                                                                            }
+                                                                        </Col>
+                                                                    </Row>
+                                                                ))}
+                                                            </InfiniteScroll>
+                                                        </div>
+                                                        <Form.Item>
+                                                            {
+                                                                priceListIsEditing &&
+                                                                <>
+                                                                    <Row justify={"space-between"}
+                                                                         style={{width: "40%", marginBottom: '20px'}}>
+                                                                        <Button
+                                                                            disabled={!activeTitle}
+                                                                            onClick={() => add()}
+                                                                        >
+                                                                            Додати поле
+                                                                        </Button>
+                                                                        <Button disabled={!activeBox} type={"dashed"}
+                                                                                onClick={() => {
+                                                                                    setOneTransferField(null)
+                                                                                    showModal(setIsModalTransferFieldsVisible)
+                                                                                }}>Перенести</Button>
+                                                                        <Button danger
+                                                                                disabled={!activeBox}
+                                                                                onClick={() => showPromiseConfirm(massDelete, 'вибрані поля')}
+                                                                                type={"primary"}>Видалити</Button>
+                                                                    </Row>
+                                                                    <Row>
+                                                                        <Button
+                                                                            htmlType={"submit"}
+                                                                            type={"primary"}
+                                                                        >Зберегти</Button>
+                                                                    </Row>
+                                                                </>
+                                                            }
+                                                        </Form.Item>
+                                                    </>
+                                                );
+                                            }}
+                                        </Form.List>
+                                    </Form>
+                                    <Modal
+                                        title="Перенести поля"
+                                        centered
+                                        destroyOnClose={true}
+                                        visible={isModalTransferFieldsVisible}
+                                        footer={
                                             <Button
-                                                type={"link"}
-                                                style={{width: '100%'}}
-                                                onClick={() => showModal(setIsModalAddVisible)}>
-                                                Додати групу
-                                            </Button>
-                                        </td>
-                                        <td>
-                                            <Button
-                                                disabled={!activeTitle || !activeBox}
-                                                type={"link"}
-                                                style={{width: '100%'}}
-                                                onClick={() => showModal(setIsModalTransferFieldsVisible)}>
-                                                Перенести поля
-                                            </Button>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <Button
-                                                disabled={!activeTitle}
-                                                type={"link"}
-                                                style={{width: '100%'}}
-                                                onClick={() => showModal(setIsModalEditVisible)}
+                                                key={"addOk"}
+                                                onClick={() => submitGroupNameForm(transferFieldsForm, setIsModalTransferFieldsVisible)}
+                                                type={"primary"}
                                             >
-                                                Редагувати групу
+                                                Підтвердити
                                             </Button>
-                                        </td>
-                                        <td>
-                                            <Button
-                                                type={"link"}
-                                                style={{width: '100%'}}
-                                                danger
-                                                onClick={showPromiseConfirmForFields}
-                                                disabled={!activeTitle || !activeBox}
+                                        }
+                                        onOk={() => submitGroupNameForm(transferFieldsForm, setIsModalTransferFieldsVisible)}
+                                        onCancel={() => handleCancel(setIsModalTransferFieldsVisible)}
+                                    >
+                                        <Form
+                                            form={transferFieldsForm}
+                                            name={"transferFields"}
+                                            requiredMark={false}
+                                            preserve={false}
+                                            onFinish={() => {
+                                                (oneTransferField !== null) ? transferField(oneTransferField) : returnCheckedItems()
+                                            }}
+                                        >
+                                            <Form.Item
+                                                name="title"
+                                                rules={[
+                                                    {
+                                                        required: true,
+                                                        message: "Виберіть групу!"
+                                                    }
+                                                ]}
                                             >
-                                                Видалити поля
-                                            </Button>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <Button
-                                                type={"link"}
-                                                onClick={showPromiseConfirm}
-                                                danger
-                                                style={{width: '100%'}}
-                                                disabled={!activeTitle}
-                                            >
-                                                Видалити групу
-                                            </Button>
-                                        </td>
-                                    </tr>
-                                    </tbody>
-                                </table>
-                                <Button
-                                    type="primary"
-                                    htmlType="submit"
-                                    style={{width: '100%', marginTop: "20px"}}
-                                    onClick={submitMainForm}
-                                    disabled={!activeTitle}
-                                >
-                                    Зберегти
-                                </Button>
-                            </Drawer>
-                        </Col>
+                                                <Select placeholder="Виберіть групу">
+                                                    {
+                                                        priceList.map(item => {
+                                                            return item.id !== activeTitle &&
+                                                                <Option
+                                                                    key={item.id}
+                                                                    value={item.titleUA}
+                                                                >
+                                                                    {item.title}
+                                                                </Option>
+                                                        })
+                                                    }
+                                                </Select>
+                                            </Form.Item>
+                                        </Form>
+                                    </Modal>
+                                </Col> :
+                                <Empty style={{margin: "20%  auto"}} image={Empty.PRESENTED_IMAGE_SIMPLE}/>
+                        }
                     </Row>
                 </Col>
             </Row>
+            <Modal
+                title="Додати групу"
+                centered
+                destroyOnClose={true}
+                visible={isModalAddVisible}
+                footer={
+                    <Button
+                        key={"addOk"}
+                        onClick={() => submitGroupNameForm(addGroupNameForm, setIsModalAddVisible)}
+                        type={"primary"}
+                    >
+                        Підтвердити
+                    </Button>
+                }
+                onOk={() => submitGroupNameForm(addGroupNameForm, setIsModalAddVisible)}
+                onCancel={() => handleCancel(setIsModalAddVisible)}
+            >
+                <Form
+                    form={addGroupNameForm}
+                    name={"createGroupName"}
+                    requiredMark={false}
+                    preserve={false}
+                    onFinish={createGroupName}
+                >
+                    <Form.Item
+                        name="titleUA"
+                        hasFeedback
+                        rules={validators}
+                    >
+                        <Input placeholder="Введіть групу en"/>
+                    </Form.Item>
+                    <Form.Item
+                        name="titleEN"
+                        hasFeedback
+                        rules={validators}
+                    >
+                        <Input placeholder="Введіть групу en"/>
+                    </Form.Item>
+                    <Form.Item
+                        name="titlePL"
+                        hasFeedback
+                        rules={validators}
+                    >
+                        <Input placeholder="Введіть групу pl"/>
+                    </Form.Item>
+
+                </Form>
+            </Modal>
         </div>
     )
 }

@@ -10,12 +10,3 @@ export function arrayWithFilter(array, action) {
         return item
     })
 }
-
-export function arrayWithFilterFromTitle(array, action) {
-    return array.map(item => {
-        if (item.title === action.payload.title) {
-            return {...item, ...action.payload}
-        }
-        return item
-    })
-}

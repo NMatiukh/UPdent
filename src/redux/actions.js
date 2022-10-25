@@ -1,15 +1,14 @@
 import {
-    CHANGE_PRICE_LIST_TITLE,
-    CREATE_PRICE_LIST,
-    DELETE_PRICE_LIST,
-    EDIT_PRICE_LIST,
+    CHANGE_PRICE_LIST_TITLE, CREATE_FIELD, CREATE_GROUP,
+    DELETE_FIELD, DELETE_GROUP, EDIT_FIELD,
+    EDIT_GROUP,
     GET_PRICE_LIST,
     SET_PRICE_LIST
 } from "./types";
 import {message} from "antd";
 import axios from "axios";
 
-const URL = 'https://fake-server-app-nmatiukh.herokuapp.com';
+const URL = 'http://localhost:3001';
 
 export function getPriceList() {
     return async dispatch => {
@@ -17,63 +16,145 @@ export function getPriceList() {
             .get(URL + "/priceList")
             .then(response => {
                 dispatch({type: GET_PRICE_LIST, payload: response.data})
-                console.log(response)
+                // console.log(response)
             })
     }
 }
 
-export function editPriceList(priceList) {
-    return async dispatch => {
-        message.loading('Завантаження...', 1);
-        axios
-            .request({
-                method: "PUT",
-                url: URL + '/priceList/' + priceList.id,
-                data: {
-                    "id": priceList.id,
-                    "title": priceList.title,
-                    "details": priceList.details.map(details => {
-                        return {
-                            "subtitle": details.subtitle,
-                            "price": details.price
-                        }
-                    })
-                }
-            })
-            .then(() => {
-                dispatch({type: EDIT_PRICE_LIST, payload: priceList})
-                message.success(`"${priceList.title}" редаговано!`);
-            })
-            .catch(() => {
-                message.error('Помика! Не вдалось відредагувати');
-            })
-    }
-}
+// FIELDS
 
-export function createPriceList(priceList) {
+export function createField(field, groupID) {
     return async dispatch => {
-        message.loading('Завантаження...', 1);
         axios
             .request({
                 method: "POST",
-                url: URL + "/priceList",
+                url: URL + '/priceLines',
                 data: {
-                    "title": priceList.title,
-                    "details": priceList.details.map(details => {
-                        return {
-                            "subtitle": details.subtitle,
-                            "price": details.price
-                        }
-                    })
+                    "subtitleUA": field.subtitleUA,
+                    "subtitleEN": field.subtitleEN || '',
+                    "subtitlePL": field.subtitlePL || '',
+                    "price": field.price,
+                    "groupID": groupID
                 }
             })
             .then(response => {
-                dispatch({type: CREATE_PRICE_LIST, payload: response.data});
-                message.success(`"${priceList.title}" створено!`);
+                dispatch({type: CREATE_FIELD, payload: {...field, ...{"groupID": groupID}}});
+                dispatch(getPriceList())
             })
             .catch((error) => {
                 message.error('Помика! Не вдалось створити!');
-                console.log(error)
+                console.error(error)
+            })
+    }
+}
+
+export function editField(field, groupID) {
+    return async dispatch => {
+        axios
+            .request({
+                method: "PUT",
+                url: URL + '/priceLines/' + field.id,
+                data: {
+                    "id": field.id,
+                    "subtitleUA": field.subtitleUA,
+                    "subtitleEN": field.subtitleEN || '',
+                    "subtitlePL": field.subtitlePL || '',
+                    "price": field.price,
+                    "groupID": parseInt(groupID)
+                }
+            })
+            .then(response => {
+                dispatch({type: EDIT_FIELD, payload: {...field, ...{"groupID": groupID}}});
+                // message.success(`"${priceList.title}" створено!`);
+            })
+            .catch((error) => {
+                message.error('Помика! Не вдалось створити!');
+                console.error(error)
+            })
+    }
+}
+
+export function deleteField(field) {
+    return async dispatch => {
+        axios
+            .request({
+                method: "DELETE",
+                url: URL + '/priceLines/' + field.id,
+            })
+            .then(response => {
+                dispatch({type: DELETE_FIELD, payload: field});
+                message.success(`"${field.subtitleUA}" видалино успішно!`);
+            })
+            .catch((error) => {
+                message.error('Помика! Не вдалось видалити!');
+                console.error(error)
+            })
+    }
+}
+
+// GROUPS
+
+export function createGroup(group) {
+    return async dispatch => {
+        axios
+            .request({
+                method: "POST",
+                url: URL + '/priceSections',
+                data: {
+                    "titleUA": group.titleUA,
+                    "titleEN": group.titleEN,
+                    "titlePL": group.titlePL,
+                }
+            })
+            .then(response => {
+                dispatch({type: CREATE_GROUP, payload: group});
+                message.success(`"${group.titleUA}" створено!`);
+            })
+            .catch((error) => {
+                message.error('Помика! Не вдалось створити!');
+                console.error(error)
+            })
+    }
+}
+
+export function editGroup(group, id) {
+    return async dispatch => {
+        axios
+            .request({
+                method: "PUT",
+                url: URL + '/priceSections/' + id,
+                data: {
+                    "titleUA": group.titleUA,
+                    "titleEN": group.titleEN,
+                    "titlePL": group.titlePL,
+                    "id": group.id
+                }
+            })
+            .then(response => {
+                dispatch({type: EDIT_GROUP, payload: group});
+                // message.success(`"${priceList.title}" створено!`);
+            })
+            .catch((error) => {
+                message.error('Помика! Не вдалось створити!');
+                console.error(error)
+            })
+    }
+}
+
+export function deleteGroup(group) {
+    return async dispatch => {
+        axios
+            .request({
+                method: "DELETE",
+                url: URL + '/priceSections/' + group.id,
+            })
+            .then(response => {
+                dispatch({type: DELETE_GROUP, payload: group});
+                message.success(`"${group.titleUA}" видалино успішно!`);
+            })
+            .catch((error) => {
+                message.error('Помика! Не вдалось видалити!');
+                console.error(error)
             })
     }
 }
@@ -82,28 +163,6 @@ export function setPriceList(item) {
     return {
         type: SET_PRICE_LIST,
         payload: item
-    }
-}
-
-export function deletePriceList(priceList) {
-    message.loading('Завантаження...', 1);
-    if (priceList.id === undefined) {
-        message.success(`"${priceList.title}" редаговано!`);
-        return {
-            type: DELETE_PRICE_LIST,
-            payload: priceList
-        }
-    } else {
-        return async dispatch => {
-            axios
-                .delete(URL + "/priceList/" + priceList.id)
-                .then(() => {
-                    message.success(`"${priceList.title}" видалено!`);
-                    dispatch({type: DELETE_PRICE_LIST, payload: priceList})
-                }).catch(r => {
-                message.error('Помика! Не вдалось видалити!');
-            })
-        }
     }
 }
 
