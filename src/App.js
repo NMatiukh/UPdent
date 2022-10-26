@@ -1,8 +1,8 @@
-import PriceList from "./components/PriceList";
+import Main from "./components/Main";
 
 function App() {
     return (
-        <PriceList/>
+        <Main/>
     );
 }
 

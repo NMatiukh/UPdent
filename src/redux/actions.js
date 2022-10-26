@@ -1,27 +1,31 @@
 import {
     CHANGE_PRICE_LIST_TITLE, CREATE_FIELD, CREATE_GROUP,
     DELETE_FIELD, DELETE_GROUP, EDIT_FIELD,
-    EDIT_GROUP,
+    EDIT_GROUP, GET_FIELDS, GET_GROUPS,
     GET_PRICE_LIST,
     SET_PRICE_LIST
 } from "./types";
 import {message} from "antd";
 import axios from "axios";
 
-const URL = 'http://localhost:3001';
+const URL = 'https://fake-server-app-nmatiukh.herokuapp.com/';
 
 export function getPriceList() {
-    return async dispatch => {
-        axios
-            .get(URL + "/priceList")
-            .then(response => {
-                dispatch({type: GET_PRICE_LIST, payload: response.data})
-                // console.log(response)
-            })
+    return {
+        type: GET_PRICE_LIST,
     }
 }
 
 // FIELDS
+export function getFields() {
+    return async dispatch => {
+        axios
+            .get(URL + "priceFields")
+            .then(response => {
+                dispatch({type: GET_FIELDS, payload: response.data})
+            })
+    }
+}
 
 export function createField(field, groupID) {
     return async dispatch => {
@@ -94,6 +98,16 @@ export function deleteField(field) {
 
 // GROUPS
 
+export function getGroups() {
+    return async dispatch => {
+        axios
+            .get(URL + "priceGroups")
+            .then(response => {
+                dispatch({type: GET_GROUPS, payload: response.data})
+            })
+    }
+}
+
 export function createGroup(group) {
     return async dispatch => {
         axios
@@ -102,13 +116,14 @@ export function createGroup(group) {
                 url: URL + '/priceSections',
                 data: {
                     "titleUA": group.titleUA,
-                    "titleEN": group.titleEN,
-                    "titlePL": group.titlePL,
+                    "titleEN": group.titleEN || '',
+                    "titlePL": group.titlePL || '',
                 }
             })
             .then(response => {
-                dispatch({type: CREATE_GROUP, payload: group});
+                dispatch({type: CREATE_GROUP, payload: {...group, "id": response.data.insertId}});
                 message.success(`"${group.titleUA}" створено!`);
+                console.log(response)
             })
             .catch((error) => {
                 message.error('Помика! Не вдалось створити!');

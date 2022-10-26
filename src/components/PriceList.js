@@ -193,6 +193,21 @@ export default function PriceList() {
         }
     }
 
+    const [statusCheckAll, setStatusCheckAll] = useState(false);
+
+    function checkAll(e) {
+        setStatusCheckAll(!statusCheckAll)
+        let valueDetails = priceList.filter(value => value.id === activeTitle)
+        form.setFieldsValue({
+            titleUA: valueDetails[0].titleUA,
+            titleEN: valueDetails[0].titleEN,
+            titlePL: valueDetails[0].titlePL,
+        })
+
+        console.log(form.getFieldsValue().details.map(value => value))
+
+    }
+
     return (
         <div onClick={() => {
             activeTitle && changeActiveBox()
@@ -329,7 +344,14 @@ export default function PriceList() {
                                                 return (
                                                     <>
                                                         <Row style={{marginBottom: "20px"}} justify={"space-between"}>
-                                                            <Col span={mainColSpanValues.checkbox}/>
+                                                            <Col span={mainColSpanValues.checkbox}>
+                                                                {
+                                                                    priceListIsEditing &&
+                                                                    <Checkbox onChange={(e) => {
+                                                                        checkAll(e)
+                                                                    }}/>
+                                                                }
+                                                            </Col>
                                                             <Col span={mainColSpanValues.operation}>
                                                                 {
                                                                     activeTitle &&
@@ -378,7 +400,7 @@ export default function PriceList() {
                                                                                     name={[index, "status"]}
                                                                                     valuePropName="checked"
                                                                                 >
-                                                                                    <Checkbox/>
+                                                                                    <Checkbox checked={statusCheckAll}/>
                                                                                 </Form.Item>
                                                                             }
                                                                         </Col>
@@ -469,8 +491,7 @@ export default function PriceList() {
                                                                                         onClick={() => {
                                                                                             setOneTransferField(field.key)
                                                                                             showModal(setIsModalTransferFieldsVisible)
-                                                                                        }
-                                                                                        }
+                                                                                        }}
                                                                                     >Перенести</Button>
                                                                                     <Button
                                                                                         danger
@@ -611,19 +632,15 @@ export default function PriceList() {
                         hasFeedback
                         rules={validators}
                     >
-                        <Input placeholder="Введіть групу en"/>
+                        <Input placeholder="Введіть групу ua"/>
                     </Form.Item>
                     <Form.Item
                         name="titleEN"
-                        hasFeedback
-                        rules={validators}
                     >
                         <Input placeholder="Введіть групу en"/>
                     </Form.Item>
                     <Form.Item
                         name="titlePL"
-                        hasFeedback
-                        rules={validators}
                     >
                         <Input placeholder="Введіть групу pl"/>
                     </Form.Item>
