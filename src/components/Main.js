@@ -4,7 +4,6 @@ import {deleteGroup, getFields, getGroups, getPriceList} from "../redux/actions"
 import {Button, Col, Menu, Row} from "antd";
 import {DeleteOutlined} from "@ant-design/icons";
 import Title from "antd/es/typography/Title";
-import MainMenu from "./MainMenu";
 import MainForm from "./MainForm";
 
 function Main() {
@@ -34,7 +33,6 @@ function Main() {
                 </Row>
                 <Row>
                     <Col>
-                        <MainMenu groups={groups}/>
 
                     </Col>
                     <Col>

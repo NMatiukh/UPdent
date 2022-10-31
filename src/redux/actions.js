@@ -90,14 +90,14 @@ export function editField(field, groupID) {
         axios
             .request({
                 method: "PUT",
-                url: URL + '/priceLines/' + field.id,
+                url: URL + '/price_lines/' + field.id,
                 data: {
                     "id": field.id,
-                    "subtitleUA": field.subtitleUA,
-                    "subtitleEN": field.subtitleEN || '',
-                    "subtitlePL": field.subtitlePL || '',
+                    "title_ua": field.subtitleUA,
+                    "title_en": field.subtitleEN || '',
+                    "title_pl": field.subtitlePL || '',
                     "price": field.price,
-                    "groupID": parseInt(groupID)
+                    "price_section_id": parseInt(groupID)
                 }
             })
             .then(response => {
@@ -111,15 +111,16 @@ export function editField(field, groupID) {
     }
 }
 
-export function deleteField(field) {
+export function deleteField(field, groupId) {
     return async dispatch => {
         axios
             .request({
                 method: "DELETE",
-                url: URL + '/priceLines/' + field.id,
+                url: URL + '/price_lines/' + field.id,
             })
             .then(response => {
-                dispatch({type: DELETE_FIELD, payload: field});
+                dispatch({type: DELETE_FIELD, payload: {...field, "groupId": groupId}});
+                console.log(field)
                 message.success(`"${field.subtitleUA}" видалино успішно!`);
             })
             .catch((error) => {
@@ -179,11 +180,11 @@ export function editGroup(group, id) {
         axios
             .request({
                 method: "PUT",
-                url: URL + '/priceSections/' + id,
+                url: URL + '/price_sections/' + id,
                 data: {
-                    "titleUA": group.titleUA,
-                    "titleEN": group.titleEN,
-                    "titlePL": group.titlePL,
+                    "title_ua": group.titleUA,
+                    "title_en": group.titleEN,
+                    "title_pl": group.titlePL,
                     "id": group.id
                 }
             })
@@ -203,7 +204,7 @@ export function deleteGroup(group) {
         axios
             .request({
                 method: "DELETE",
-                url: URL + '/priceSections/' + group.id,
+                url: URL + '/price_sections/' + group.id,
             })
             .then(response => {
                 dispatch({type: DELETE_GROUP, payload: group});

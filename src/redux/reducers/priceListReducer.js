@@ -25,7 +25,7 @@ export const priceListReducer = (state = initialState, action) => {
         case DELETE_FIELD:
             return {
                 ...state,
-                priceList: state.priceList.map(value => value.id === action.payload.groupID ? {
+                priceList: state.priceList.map(value => value.id === action.payload.groupId ? {
                     ...value,
                     details: value.details.filter(value1 => value1.id !== action.payload.id)
                 } : value)

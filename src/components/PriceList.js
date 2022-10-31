@@ -86,7 +86,7 @@ export default function PriceList() {
             titleUA: obj.titleUA,
             titleEN: obj.titleEN,
             titlePL: obj.titlePL,
-            details: obj.details,
+            details: obj.details || '',
         });
         setActiveTitle(parseInt(value.key))
     };
@@ -156,7 +156,7 @@ export default function PriceList() {
     const massDelete = () => {
         let detailsTrue = form.getFieldsValue().details.filter(value => value.status);
         let detailsFalse = form.getFieldsValue().details.filter(value => !value.status);
-        detailsTrue.map(value => dispatch(deleteField(value)))
+        detailsTrue.map(value => dispatch(deleteField(value, activeTitle)))
         form.setFieldsValue({
             details: detailsFalse
         })
@@ -191,21 +191,6 @@ export default function PriceList() {
         } catch (e) {
 
         }
-    }
-
-    const [statusCheckAll, setStatusCheckAll] = useState(false);
-
-    function checkAll(e) {
-        setStatusCheckAll(!statusCheckAll)
-        let valueDetails = priceList.filter(value => value.id === activeTitle)
-        form.setFieldsValue({
-            titleUA: valueDetails[0].titleUA,
-            titleEN: valueDetails[0].titleEN,
-            titlePL: valueDetails[0].titlePL,
-        })
-
-        console.log(form.getFieldsValue().details.map(value => value))
-
     }
 
     return (
@@ -345,12 +330,7 @@ export default function PriceList() {
                                                     <>
                                                         <Row style={{marginBottom: "20px"}} justify={"space-between"}>
                                                             <Col span={mainColSpanValues.checkbox}>
-                                                                {
-                                                                    priceListIsEditing &&
-                                                                    <Checkbox onChange={(e) => {
-                                                                        checkAll(e)
-                                                                    }}/>
-                                                                }
+
                                                             </Col>
                                                             <Col span={mainColSpanValues.operation}>
                                                                 {
@@ -400,7 +380,7 @@ export default function PriceList() {
                                                                                     name={[index, "status"]}
                                                                                     valuePropName="checked"
                                                                                 >
-                                                                                    <Checkbox checked={statusCheckAll}/>
+                                                                                    <Checkbox/>
                                                                                 </Form.Item>
                                                                             }
                                                                         </Col>
@@ -497,7 +477,7 @@ export default function PriceList() {
                                                                                         danger
                                                                                         type={"primary"}
                                                                                         onClick={() => showPromiseConfirm(() => {
-                                                                                            dispatch(deleteField(form.getFieldsValue().details[field.key]))
+                                                                                            dispatch(deleteField(form.getFieldsValue().details[field.key], activeTitle))
                                                                                             remove(field.name)
                                                                                         }, 'поле')}
                                                                                     >
