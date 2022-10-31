@@ -8,7 +8,7 @@ import {
 import {message} from "antd";
 import axios from "axios";
 
-const URL = 'https://fake-server-app-nmatiukh.herokuapp.com/';
+const URL = 'https://updent.com.ua/api/v1/';
 
 export function getPriceList() {
     return {
@@ -20,9 +20,19 @@ export function getPriceList() {
 export function getFields() {
     return async dispatch => {
         axios
-            .get(URL + "priceFields")
+            .get(URL + "price_lines")
             .then(response => {
-                dispatch({type: GET_FIELDS, payload: response.data})
+                dispatch({
+                    type: GET_FIELDS, payload: response.data.data.map(value => {
+                        return {
+                            "id": value.id,
+                            "titleUA": value.attributes.title_ua,
+                            "titleEN": value.attributes.title_en,
+                            "titlePL": value.attributes.title_pl,
+                            "sectionId": value.attributes.price_section_id
+                        }
+                    })
+                })
             })
     }
 }
@@ -101,9 +111,18 @@ export function deleteField(field) {
 export function getGroups() {
     return async dispatch => {
         axios
-            .get(URL + "priceGroups")
+            .get(URL + "price_sections")
             .then(response => {
-                dispatch({type: GET_GROUPS, payload: response.data})
+                dispatch({
+                    type: GET_GROUPS, payload: response.data.data.map(value => {
+                        return {
+                            "id": value.id,
+                            "titleUA": value.attributes.title_ua,
+                            "titleEN": value.attributes.title_en,
+                            "titlePL": value.attributes.title_pl,
+                        }
+                    })
+                })
             })
     }
 }
