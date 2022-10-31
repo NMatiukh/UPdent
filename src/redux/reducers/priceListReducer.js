@@ -15,7 +15,7 @@ const initialState = {
 export const priceListReducer = (state = initialState, action) => {
     switch (action.type) {
         case GET_PRICE_LIST:
-            return {...state, priceList: state.groups}
+            return {...state, priceList: action.payload}
         case GET_GROUPS:
             return {...state, groups: action.payload}
         case GET_FIELDS:

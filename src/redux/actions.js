@@ -11,8 +11,31 @@ import axios from "axios";
 const URL = 'https://updent.com.ua/api/v1/';
 
 export function getPriceList() {
-    return {
-        type: GET_PRICE_LIST,
+    return async dispatch => {
+        axios
+            .get(URL + "price_sections")
+            .then(response => {
+                dispatch({
+                    type: GET_PRICE_LIST, payload: response.data.data.map(value => {
+                        return {
+                            "id": parseInt(value.id),
+                            "titleUA": value.attributes.title_ua,
+                            "titleEN": value.attributes.title_en,
+                            "titlePL": value.attributes.title_pl,
+                            "details": value.attributes.price_lines.map(detail => {
+                                return {
+                                    "id": parseInt(detail.id),
+                                    "subtitleUA": detail.title_ua,
+                                    "subtitleEN": detail.title_en,
+                                    "subtitlePL": detail.title_pl,
+                                    "sectionId": parseInt(detail.price_section_id),
+                                    "price": parseInt(detail.price_ua)
+                                }
+                            })
+                        }
+                    })
+                })
+            })
     }
 }
 
@@ -42,13 +65,13 @@ export function createField(field, groupID) {
         axios
             .request({
                 method: "POST",
-                url: URL + '/priceLines',
+                url: URL + '/price_lines',
                 data: {
-                    "subtitleUA": field.subtitleUA,
-                    "subtitleEN": field.subtitleEN || '',
-                    "subtitlePL": field.subtitlePL || '',
-                    "price": field.price,
-                    "groupID": groupID
+                    "title_ua": field.subtitleUA,
+                    "title_en": field.subtitleEN || '',
+                    "title_pl": field.subtitlePL || '',
+                    "price_ua": field.price,
+                    "price_section_id": groupID
                 }
             })
             .then(response => {
@@ -132,11 +155,11 @@ export function createGroup(group) {
         axios
             .request({
                 method: "POST",
-                url: URL + '/priceSections',
+                url: URL + '/price_sections',
                 data: {
-                    "titleUA": group.titleUA,
-                    "titleEN": group.titleEN || '',
-                    "titlePL": group.titlePL || '',
+                    "title_ua": group.titleUA,
+                    "title_en": group.titleEN || '',
+                    "title_pl": group.titlePL || '',
                 }
             })
             .then(response => {
