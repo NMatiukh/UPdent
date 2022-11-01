@@ -98,7 +98,6 @@ export function deleteField(field, groupId) {
             })
             .then(response => {
                 dispatch({type: DELETE_FIELD, payload: {...field, "groupId": groupId}});
-                console.log(field)
                 message.success(`"${field.subtitleUA}" видалино успішно!`);
             })
             .catch((error) => {

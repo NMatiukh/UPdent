@@ -129,12 +129,6 @@ export default function PriceList() {
     };
     const createGroupName = (values) => {
         dispatch(createGroup(values))
-        // form.setFieldsValue({
-        //     "titleUA": values.titleUA,
-        //     "titleEN": values.titleEN,
-        //     "titlePL": values.titlePL,
-        //     details: [{}],
-        // });
         dispatch(getPriceList());
     }
     const returnCheckedItems = () => {
@@ -168,15 +162,14 @@ export default function PriceList() {
             value1.titleUA === transferFieldsForm.getFieldValue('title') && (id = value1.id)
         })
         let field = form.getFieldsValue().details[key];
-
         let valueDetails = priceList.filter(value => value.id === activeTitle)
         form.setFieldsValue({
             titleUA: valueDetails[0].titleUA,
             titleEN: valueDetails[0].titleEN,
             titlePL: valueDetails[0].titlePL,
-            details: valueDetails[0].details.filter(value => value.id !== field.id),
+            details: valueDetails[0].details.filter(value => value.id !== valueDetails[0].details[key-1].id),
         });
-        dispatch(editField(field, id))
+        dispatch(editField({...field, "id": valueDetails[0].details[key-1].id}, id))
         dispatch(getPriceList());
         message.success(`Перенесено поле!`);
     }
