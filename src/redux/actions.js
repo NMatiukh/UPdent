@@ -89,7 +89,7 @@ export function editField(field, groupID) {
     }
 }
 
-export function deleteField(field, groupId) {
+export function deleteField(field, groupID) {
     return async dispatch => {
         axios
             .request({
@@ -97,7 +97,7 @@ export function deleteField(field, groupId) {
                 url: URL + '/price_lines/' + field.id,
             })
             .then(response => {
-                dispatch({type: DELETE_FIELD, payload: {...field, "groupId": groupId}});
+                dispatch({type: DELETE_FIELD, payload: {...field, "groupID": groupID}});
                 message.success(`"${field.subtitleUA}" видалино успішно!`);
             })
             .catch((error) => {

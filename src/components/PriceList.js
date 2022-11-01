@@ -157,20 +157,22 @@ export default function PriceList() {
     }
 
     function transferField(key) {
+        console.log({"key": key, "field": form.getFieldsValue().details})
         let id;
         priceList.map(value1 => {
             value1.titleUA === transferFieldsForm.getFieldValue('title') && (id = value1.id)
         })
-        let field = form.getFieldsValue().details[key-1];
+        let field = form.getFieldsValue().details[(key)];
+        console.log(field)
         let valueDetails = priceList.filter(value => value.id === activeTitle)
         form.setFieldsValue({
             titleUA: valueDetails[0].titleUA,
             titleEN: valueDetails[0].titleEN,
             titlePL: valueDetails[0].titlePL,
-            details: valueDetails[0].details.filter(value => value.id !== valueDetails[0].details[key-1].id),
+            details: valueDetails[0].details.filter(value => value.id !== valueDetails[0].details[key].id),
         });
-        console.log({...field, "id": valueDetails[0].details[key-1].id})
-        dispatch(editField({...field, "id": valueDetails[0].details[key-1].id}, id))
+        console.log({...field, "id": valueDetails[0].details[key].id})
+        dispatch(editField({...field, "id": valueDetails[0].details[key].id}, id))
         message.success(`Перенесено поле!`);
     }
 
@@ -460,7 +462,7 @@ export default function PriceList() {
                                                                                     <Button
                                                                                         type={"dashed"}
                                                                                         onClick={() => {
-                                                                                            setOneTransferField(field.key)
+                                                                                            setOneTransferField(field.name)
                                                                                             showModal(setIsModalTransferFieldsVisible)
                                                                                         }}
                                                                                     >Перенести</Button>
@@ -468,7 +470,8 @@ export default function PriceList() {
                                                                                         danger
                                                                                         type={"primary"}
                                                                                         onClick={() => showPromiseConfirm(() => {
-                                                                                            dispatch(deleteField(form.getFieldsValue().details[field.key], activeTitle))
+                                                                                            console.log({"from": form.getFieldsValue().details, "fields": fields})
+                                                                                            dispatch(deleteField(form.getFieldsValue().details[field.name], activeTitle))
                                                                                             remove(field.name)
                                                                                         }, 'поле')}
                                                                                     >
