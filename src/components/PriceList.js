@@ -171,7 +171,6 @@ export default function PriceList() {
         });
         console.log({...field, "id": valueDetails[0].details[key-1].id})
         dispatch(editField({...field, "id": valueDetails[0].details[key-1].id}, id))
-        dispatch(getPriceList());
         message.success(`Перенесено поле!`);
     }
 
