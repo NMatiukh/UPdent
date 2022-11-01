@@ -161,7 +161,7 @@ export default function PriceList() {
         priceList.map(value1 => {
             value1.titleUA === transferFieldsForm.getFieldValue('title') && (id = value1.id)
         })
-        let field = form.getFieldsValue().details[key];
+        let field = form.getFieldsValue().details[key-1];
         let valueDetails = priceList.filter(value => value.id === activeTitle)
         form.setFieldsValue({
             titleUA: valueDetails[0].titleUA,
@@ -169,6 +169,7 @@ export default function PriceList() {
             titlePL: valueDetails[0].titlePL,
             details: valueDetails[0].details.filter(value => value.id !== valueDetails[0].details[key-1].id),
         });
+        console.log({...field, "id": valueDetails[0].details[key-1].id})
         dispatch(editField({...field, "id": valueDetails[0].details[key-1].id}, id))
         dispatch(getPriceList());
         message.success(`Перенесено поле!`);
