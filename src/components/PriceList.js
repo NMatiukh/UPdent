@@ -19,7 +19,6 @@ import {
 import React, {useEffect, useState} from "react";
 import TextArea from "antd/es/input/TextArea";
 import InfiniteScroll from 'react-infinite-scroll-component';
-import './style/PriceList.css';
 import {message} from "antd";
 
 const {Option} = Select;
@@ -127,16 +126,15 @@ export default function PriceList() {
         })
         dispatch(getPriceList())
         message.success(`Виконано!`);
-        // console.log({...values, ...{id: activeTitle}})
     };
     const createGroupName = (values) => {
         dispatch(createGroup(values))
-        form.setFieldsValue({
-            "titleUA": values.titleUA,
-            "titleEN": values.titleEN,
-            "titlePL": values.titlePL,
-            details: [{}],
-        });
+        // form.setFieldsValue({
+        //     "titleUA": values.titleUA,
+        //     "titleEN": values.titleEN,
+        //     "titlePL": values.titlePL,
+        //     details: [{}],
+        // });
         dispatch(getPriceList());
     }
     const returnCheckedItems = () => {
@@ -243,8 +241,8 @@ export default function PriceList() {
                                 }
                             })}
                             onClick={(item) => handleChange(item)}
-                            selectable={[activeTitle]}
-                            selectedKeys={[activeTitle]}
+                            selectable={true}
+                            selectedKeys={[activeTitle.toString()]}
                             style={{
                                 borderBottom: "1px solid rgba(217, 217, 217, 1)",
                                 margin: "20px 0"
@@ -624,7 +622,6 @@ export default function PriceList() {
                     >
                         <Input placeholder="Введіть групу pl"/>
                     </Form.Item>
-
                 </Form>
             </Modal>
         </div>

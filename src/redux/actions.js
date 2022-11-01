@@ -1,9 +1,7 @@
 import {
-    CHANGE_PRICE_LIST_TITLE, CREATE_FIELD, CREATE_GROUP,
+    CREATE_FIELD, CREATE_GROUP,
     DELETE_FIELD, DELETE_GROUP, EDIT_FIELD,
-    EDIT_GROUP, GET_FIELDS, GET_GROUPS,
-    GET_PRICE_LIST,
-    SET_PRICE_LIST
+    EDIT_GROUP, GET_PRICE_LIST
 } from "./types";
 import {message} from "antd";
 import axios from "axios";
@@ -40,26 +38,6 @@ export function getPriceList() {
 }
 
 // FIELDS
-export function getFields() {
-    return async dispatch => {
-        axios
-            .get(URL + "price_lines")
-            .then(response => {
-                dispatch({
-                    type: GET_FIELDS, payload: response.data.data.map(value => {
-                        return {
-                            "id": value.id,
-                            "titleUA": value.attributes.title_ua,
-                            "titleEN": value.attributes.title_en,
-                            "titlePL": value.attributes.title_pl,
-                            "sectionId": value.attributes.price_section_id
-                        }
-                    })
-                })
-            })
-    }
-}
-
 export function createField(field, groupID) {
     return async dispatch => {
         axios
@@ -131,26 +109,6 @@ export function deleteField(field, groupId) {
 }
 
 // GROUPS
-
-export function getGroups() {
-    return async dispatch => {
-        axios
-            .get(URL + "price_sections")
-            .then(response => {
-                dispatch({
-                    type: GET_GROUPS, payload: response.data.data.map(value => {
-                        return {
-                            "id": value.id,
-                            "titleUA": value.attributes.title_ua,
-                            "titleEN": value.attributes.title_en,
-                            "titlePL": value.attributes.title_pl,
-                        }
-                    })
-                })
-            })
-    }
-}
-
 export function createGroup(group) {
     return async dispatch => {
         axios
@@ -214,19 +172,5 @@ export function deleteGroup(group) {
                 message.error('Помика! Не вдалось видалити!');
                 console.error(error)
             })
-    }
-}
-
-export function setPriceList(item) {
-    return {
-        type: SET_PRICE_LIST,
-        payload: item
-    }
-}
-
-export function changePriceListTitle(item) {
-    return {
-        type: CHANGE_PRICE_LIST_TITLE,
-        payload: item
     }
 }

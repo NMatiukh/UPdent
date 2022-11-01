@@ -1,10 +1,9 @@
 import {
-    CHANGE_PRICE_LIST_TITLE, CREATE_FIELD, CREATE_GROUP,
-    DELETE_FIELD, DELETE_GROUP, EDIT_FIELD, GET_FIELDS, GET_GROUPS,
-    GET_PRICE_LIST,
-    SET_PRICE_LIST
+    CREATE_FIELD, CREATE_GROUP,
+    DELETE_FIELD, DELETE_GROUP, GET_FIELDS, GET_GROUPS,
+    GET_PRICE_LIST
 } from "../types";
-import {arrayWithDelete, arrayWithFilter} from "./someFunctions";
+import {arrayWithDelete} from "./someFunctions";
 
 const initialState = {
     priceList: [],
@@ -42,13 +41,6 @@ export const priceListReducer = (state = initialState, action) => {
                     ...value,
                     details: [...value.details, action.payload]
                 } : value)
-            }
-        case SET_PRICE_LIST:
-            return {...state, priceList: [...state.priceList, action.payload]}
-        case CHANGE_PRICE_LIST_TITLE:
-            return {
-                ...state,
-                priceList: arrayWithFilter(state.priceList, action)
             }
         default:
             return state
