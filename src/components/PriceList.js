@@ -201,53 +201,56 @@ export default function PriceList() {
             <Row justify={"space-between"}>
                 <Col
                     span={4}
-                    style={{
-                        maxHeight: ((85 * document.documentElement.clientHeight) / 100),
-                        overflow: 'auto',
-                    }}
                 >
-                    <InfiniteScroll
-                        dataLength={priceList.length}
-                        hasMore={false}
-                        loader={<Spin/>}
-                        next={() => {
-                            console.log("this is the end of list")
+                    <div
+                        style={{
+                            maxHeight: ((80 * document.documentElement.clientHeight) / 100),
+                            overflow: 'auto',
+                            borderBottom: "1px solid rgba(217, 217, 217, 1)",
+                            margin: "20px 0"
                         }}
                     >
-                        <Menu
-                            mode="inline"
-                            items={priceList.map(value => {
-                                return {
-                                    label: <Row justify={"space-between"} align={"middle"}>
-                                        {value.titleUA}
-                                        {
-                                            priceListIsEditing && <DeleteOutlined onClick={() => {
-                                                showPromiseConfirm(() => {
-                                                    dispatch(deleteGroup(value))
-                                                    setActiveTitle(0)
-                                                    form.setFieldsValue({
-                                                        details: []
-                                                    })
-                                                }, 'групу')
-                                            }}/>
-                                        }
-                                    </Row>,
-                                    key: value.id
-                                }
-                            })}
-                            onClick={(item) => handleChange(item)}
-                            selectable={true}
-                            selectedKeys={[activeTitle.toString()]}
-                            style={{
-                                borderBottom: "1px solid rgba(217, 217, 217, 1)",
-                                margin: "20px 0"
+                        <InfiniteScroll
+                            dataLength={priceList.length}
+                            hasMore={false}
+                            loader={<Spin/>}
+                            next={() => {
+                                console.log("this is the end of list")
                             }}
-                        />
-                    </InfiniteScroll>
-                    {
-                        priceListIsEditing &&
-                        <Button onClick={() => showModal(setIsModalAddVisible)}>Додати групу</Button>
-                    }
+                        >
+                            <Menu
+                                mode="inline"
+                                items={priceList.map(value => {
+                                    return {
+                                        label: <Row justify={"space-between"} align={"middle"}>
+                                            {value.titleUA}
+                                            {
+                                                priceListIsEditing && <DeleteOutlined onClick={() => {
+                                                    showPromiseConfirm(() => {
+                                                        dispatch(deleteGroup(value))
+                                                        setActiveTitle(0)
+                                                        form.setFieldsValue({
+                                                            details: []
+                                                        })
+                                                    }, 'групу')
+                                                }}/>
+                                            }
+                                        </Row>,
+                                        key: value.id
+                                    }
+                                })}
+                                onClick={(item) => handleChange(item)}
+                                selectable={true}
+                                selectedKeys={[activeTitle.toString()]}
+                            />
+                        </InfiniteScroll>
+                    </div>
+                    <div>
+                        {
+                            priceListIsEditing &&
+                            <Button onClick={() => showModal(setIsModalAddVisible)}>Додати групу</Button>
+                        }
+                    </div>
                 </Col>
                 <Col span={20}>
                     <Row justify={"space-between"} style={{marginLeft: "6%"}}>
@@ -470,7 +473,10 @@ export default function PriceList() {
                                                                                         danger
                                                                                         type={"primary"}
                                                                                         onClick={() => showPromiseConfirm(() => {
-                                                                                            console.log({"from": form.getFieldsValue().details, "fields": fields})
+                                                                                            console.log({
+                                                                                                "from": form.getFieldsValue().details,
+                                                                                                "fields": fields
+                                                                                            })
                                                                                             dispatch(deleteField(form.getFieldsValue().details[field.name], activeTitle))
                                                                                             remove(field.name)
                                                                                         }, 'поле')}
