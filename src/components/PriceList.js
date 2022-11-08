@@ -385,7 +385,7 @@ export default function PriceList() {
                                                                     <Row key={field.key}
                                                                          justify={"space-between"}
                                                                          style={{marginBottom: "20px", cursor: "move"}}
-                                                                         draggable={true}
+                                                                         draggable={priceListIsEditing}
                                                                          onDragStart={(e) => dragItem.current = index}
                                                                          onDragEnter={(e) => dragOverItem.current = index}
                                                                          onDragEnd={handleSort}

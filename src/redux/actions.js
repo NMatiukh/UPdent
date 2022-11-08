@@ -20,7 +20,8 @@ export function getPriceList() {
                             "titleUA": value.attributes.title_ua,
                             "titleEN": value.attributes.title_en,
                             "titlePL": value.attributes.title_pl,
-                            "details": value.attributes.price_lines.map(detail => {
+                            "details": value.attributes.price_lines.map((detail, index) => {
+                                index = detail.priority;
                                 return {
                                     "id": parseInt(detail.id),
                                     "subtitleUA": detail.title_ua,
