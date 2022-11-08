@@ -1,7 +1,7 @@
 import {
     CREATE_FIELD, CREATE_GROUP,
     DELETE_FIELD, DELETE_GROUP, EDIT_FIELD,
-    EDIT_GROUP, GET_PRICE_LIST
+    EDIT_GROUP, GET_PRICE_LIST, SET_PRICE_DETAILS
 } from "./types";
 import {message} from "antd";
 import axios from "axios";
@@ -27,7 +27,8 @@ export function getPriceList() {
                                     "subtitleEN": detail.title_en,
                                     "subtitlePL": detail.title_pl,
                                     "sectionId": parseInt(detail.price_section_id),
-                                    "price": parseInt(detail.price_ua)
+                                    "price": parseInt(detail.price_ua),
+                                    "priority": detail.priority
                                 }
                             })
                         }
@@ -37,8 +38,16 @@ export function getPriceList() {
     }
 }
 
+export function setPriceDetails(details) {
+    return {
+        type: SET_PRICE_DETAILS,
+        payload: details
+    }
+}
+
 // FIELDS
 export function createField(field, groupID) {
+    console.log("create!")
     return async dispatch => {
         axios
             .request({
@@ -49,7 +58,8 @@ export function createField(field, groupID) {
                     "title_en": field.subtitleEN || '',
                     "title_pl": field.subtitlePL || '',
                     "price_ua": field.price,
-                    "price_section_id": groupID
+                    "price_section_id": groupID,
+                    "priority": field.priority
                 }
             })
             .then(response => {
@@ -64,6 +74,7 @@ export function createField(field, groupID) {
 }
 
 export function editField(field, groupID) {
+    console.log({"edit!": field.priority, "name:": field.subtitleUA})
     return async dispatch => {
         axios
             .request({
@@ -75,7 +86,8 @@ export function editField(field, groupID) {
                     "title_en": field.subtitleEN || '',
                     "title_pl": field.subtitlePL || '',
                     "price": field.price,
-                    "price_section_id": parseInt(groupID)
+                    "price_section_id": parseInt(groupID),
+                    "priority": field.priority
                 }
             })
             .then(response => {

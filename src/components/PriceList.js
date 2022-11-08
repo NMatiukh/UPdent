@@ -14,9 +14,9 @@ import {useDispatch, useSelector} from "react-redux";
 import {
     createField, createGroup, deleteField, deleteGroup,
     editField, editGroup,
-    getPriceList
+    getPriceList, setPriceDetails
 } from "../redux/actions";
-import React, {useEffect, useState} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import TextArea from "antd/es/input/TextArea";
 import InfiniteScroll from 'react-infinite-scroll-component';
 import {message} from "antd";
@@ -117,14 +117,15 @@ export default function PriceList() {
     }
 
     const onFinish = (values) => {
-        dispatch(editGroup(values, activeTitle))
         values.details.map(item => {
+            console.log(item.priority)})
+        dispatch(editGroup(values, activeTitle))
+        values.details.map((item) => {
             item.id ?
                 dispatch(editField(item, activeTitle))
                 :
                 dispatch(createField(item, activeTitle));
         })
-        dispatch(getPriceList())
         message.success(`Виконано!`);
     };
     const createGroupName = (values) => {
@@ -184,6 +185,22 @@ export default function PriceList() {
         } catch (e) {
 
         }
+    }
+
+
+    const dragItem = useRef(null);
+    const dragOverItem = useRef(null);
+
+    const handleSort = () => {
+        let _price = [...priceList.filter(value => value.id === activeTitle)[0].details]
+        const draggedItemContent = _price.splice(dragItem.current, 1)[0];
+        _price.splice(dragOverItem.current, 0, draggedItemContent);
+        dragItem.current = null;
+        dragOverItem.current = null;
+        _price = _price.map((value, index) => {return {...value, "priority": index}})
+        dispatch(setPriceDetails(_price))
+        form.setFieldValue(
+            "details", _price);
     }
 
     return (
@@ -367,7 +384,12 @@ export default function PriceList() {
                                                                 {fields.map((field, index) => (
                                                                     <Row key={field.key}
                                                                          justify={"space-between"}
-                                                                         style={{marginBottom: "20px"}}
+                                                                         style={{marginBottom: "20px", cursor: "move"}}
+                                                                         draggable={true}
+                                                                         onDragStart={(e) => dragItem.current = index}
+                                                                         onDragEnter={(e) => dragOverItem.current = index}
+                                                                         onDragEnd={handleSort}
+                                                                         onDragOver={(e) => e.preventDefault()}
                                                                     >
                                                                         <Col span={mainColSpanValues.checkbox}>
                                                                             {

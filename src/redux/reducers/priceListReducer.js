@@ -1,7 +1,7 @@
 import {
     CREATE_FIELD, CREATE_GROUP,
     DELETE_FIELD, DELETE_GROUP, EDIT_FIELD, GET_FIELDS, GET_GROUPS,
-    GET_PRICE_LIST
+    GET_PRICE_LIST, SET_PRICE_DETAILS
 } from "../types";
 import {arrayWithDelete} from "./someFunctions";
 
@@ -15,6 +15,8 @@ export const priceListReducer = (state = initialState, action) => {
     switch (action.type) {
         case GET_PRICE_LIST:
             return {...state, priceList: action.payload}
+        case SET_PRICE_DETAILS:
+            return {...state, priceList: state.priceList.map(value => value.id === action.payload[0].sectionId ? {...value, details: action.payload} : value)}
         case GET_GROUPS:
             return {...state, groups: action.payload}
         case GET_FIELDS:
@@ -46,7 +48,7 @@ export const priceListReducer = (state = initialState, action) => {
             return {
                 ...state,
                 priceList: state.priceList.map(value => value.id === action.payload.groupID ? {
-                    ...value, details: [...value.details, action.payload]
+                    ...value, details: value.details.map(detail => detail.id === action.payload.id ? action.payload : detail)
                 }: {...value, details: value.details.filter(value1 => value1.id !== action.payload.id)})
             }
         default:
