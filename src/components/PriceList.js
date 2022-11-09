@@ -439,6 +439,7 @@ export default function PriceList() {
                                                                         <Col span={mainColSpanValues.operation}>
                                                                             <Form.Item
                                                                                 label={"ua"}
+                                                                                labelCol={{span: 1}}
                                                                                 name={[index, "subtitleUA"]}
                                                                                 style={{marginBottom: 5}}
                                                                                 rules={
@@ -464,6 +465,7 @@ export default function PriceList() {
                                                                             <Form.Item
                                                                                 label={"en"}
                                                                                 name={[index, "subtitleEN"]}
+                                                                                labelCol={{span: 1}}
                                                                                 style={{marginBottom: 5}}
                                                                             >
                                                                                 <TextArea maxLength={71}
@@ -479,6 +481,7 @@ export default function PriceList() {
                                                                             </Form.Item>
                                                                             <Form.Item
                                                                                 label={"pl"}
+                                                                                labelCol={{span: 1}}
                                                                                 name={[index, "subtitlePL"]}
                                                                                 style={{marginBottom: 5}}
                                                                             >
