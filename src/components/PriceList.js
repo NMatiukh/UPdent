@@ -117,8 +117,6 @@ export default function PriceList() {
     }
 
     const onFinish = (values) => {
-        values.details.map(item => {
-            console.log(item.priority)})
         dispatch(editGroup(values, activeTitle))
         values.details.map((item) => {
             item.id ?

@@ -15,13 +15,15 @@ export function getPriceList() {
             .then(response => {
                 dispatch({
                     type: GET_PRICE_LIST, payload: response.data.data.map(value => {
+                        value.attributes.price_lines.sort((a, b) => {
+                            return a.priority - b.priority;
+                        })
                         return {
                             "id": parseInt(value.id),
                             "titleUA": value.attributes.title_ua,
                             "titleEN": value.attributes.title_en,
                             "titlePL": value.attributes.title_pl,
-                            "details": value.attributes.price_lines.map((detail, index) => {
-                                index = detail.priority;
+                            "details": value.attributes.price_lines.map((detail) => {
                                 return {
                                     "id": parseInt(detail.id),
                                     "subtitleUA": detail.title_ua,
@@ -29,7 +31,7 @@ export function getPriceList() {
                                     "subtitlePL": detail.title_pl,
                                     "sectionId": parseInt(detail.price_section_id),
                                     "price": parseInt(detail.price_ua),
-                                    "priority": detail.priority
+                                    "priority": parseInt(detail.priority)
                                 }
                             })
                         }
@@ -48,7 +50,6 @@ export function setPriceDetails(details) {
 
 // FIELDS
 export function createField(field, groupID) {
-    console.log("create!")
     return async dispatch => {
         axios
             .request({
@@ -75,7 +76,6 @@ export function createField(field, groupID) {
 }
 
 export function editField(field, groupID) {
-    console.log({"edit!": field.priority, "name:": field.subtitleUA})
     return async dispatch => {
         axios
             .request({
@@ -86,7 +86,7 @@ export function editField(field, groupID) {
                     "title_ua": field.subtitleUA,
                     "title_en": field.subtitleEN || '',
                     "title_pl": field.subtitlePL || '',
-                    "price": field.price,
+                    "price_ua": field.price,
                     "price_section_id": parseInt(groupID),
                     "priority": field.priority
                 }
