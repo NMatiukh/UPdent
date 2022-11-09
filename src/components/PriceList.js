@@ -381,7 +381,7 @@ export default function PriceList() {
                                                             <Col span={mainColSpanValues.operation}>
                                                                 {
                                                                     activeTitle &&
-                                                                    <Text>
+                                                                    <Text strong>
                                                                         Операція
                                                                     </Text>
                                                                 }
@@ -389,7 +389,7 @@ export default function PriceList() {
                                                             <Col span={mainColSpanValues.price}>
                                                                 {
                                                                     activeTitle &&
-                                                                    <Text>
+                                                                    <Text strong>
                                                                         Ціна, грн
                                                                     </Text>
                                                                 }
