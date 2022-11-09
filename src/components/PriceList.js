@@ -20,6 +20,8 @@ import React, {useEffect, useRef, useState} from "react";
 import TextArea from "antd/es/input/TextArea";
 import InfiniteScroll from 'react-infinite-scroll-component';
 import {message} from "antd";
+import './style.css'
+
 
 const {Option} = Select;
 const {confirm} = Modal;
@@ -423,6 +425,7 @@ export default function PriceList() {
                                                                          onDragEnter={(e) => dragOverItem.current = index}
                                                                          onDragEnd={handleSort}
                                                                          onDragOver={(e) => e.preventDefault()}
+                                                                         id={"field"}
                                                                     >
                                                                         <Col span={mainColSpanValues.checkbox}>
                                                                             {
