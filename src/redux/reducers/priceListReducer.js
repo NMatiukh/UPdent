@@ -1,7 +1,7 @@
 import {
     CREATE_FIELD, CREATE_GROUP,
-    DELETE_FIELD, DELETE_GROUP, EDIT_FIELD, GET_FIELDS, GET_GROUPS,
-    GET_PRICE_LIST, SET_PRICE_DETAILS
+    DELETE_FIELD, DELETE_GROUP, EDIT_FIELD, EDIT_GROUP, GET_FIELDS, GET_GROUPS,
+    GET_PRICE_LIST, SET_PRICE_DETAILS, SET_PRICE_LIST
 } from "../types";
 import {arrayWithDelete} from "./someFunctions";
 
@@ -16,7 +16,15 @@ export const priceListReducer = (state = initialState, action) => {
         case GET_PRICE_LIST:
             return {...state, priceList: action.payload}
         case SET_PRICE_DETAILS:
-            return {...state, priceList: state.priceList.map(value => value.id === action.payload[0].sectionId ? {...value, details: action.payload} : value)}
+            return {
+                ...state,
+                priceList: state.priceList.map(value => value.id === action.payload[0].sectionId ? {
+                    ...value,
+                    details: action.payload
+                } : value)
+            }
+        case SET_PRICE_LIST:
+            return {...state, priceList: action.payload}
         case GET_GROUPS:
             return {...state, groups: action.payload}
         case GET_FIELDS:
@@ -48,8 +56,13 @@ export const priceListReducer = (state = initialState, action) => {
             return {
                 ...state,
                 priceList: state.priceList.map(value => value.id === action.payload.groupID ? {
-                    ...value, details: value.details.map(detail => detail.id === action.payload.id ? action.payload : detail)
-                }: {...value, details: value.details.filter(value1 => value1.id !== action.payload.id)})
+                    ...value,
+                    details: value.details.map(detail => detail.id === action.payload.id ? action.payload : detail)
+                } : {...value, details: value.details.filter(value1 => value1.id !== action.payload.id)})
+            }
+        case EDIT_GROUP:
+            return {
+                ...state, priceList: state.priceList.map(value => value.id === action.payload.id ? action.payload : value)
             }
         default:
             return state

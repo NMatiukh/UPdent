@@ -1,7 +1,7 @@
 import {
     CREATE_FIELD, CREATE_GROUP,
     DELETE_FIELD, DELETE_GROUP, EDIT_FIELD,
-    EDIT_GROUP, GET_PRICE_LIST, SET_PRICE_DETAILS
+    EDIT_GROUP, GET_PRICE_LIST, SET_PRICE_DETAILS, SET_PRICE_LIST
 } from "./types";
 import {message} from "antd";
 import axios from "axios";
@@ -13,8 +13,11 @@ export function getPriceList() {
         axios
             .get(URL + "price_sections")
             .then(response => {
+                let arr = response.data.data.sort((a, b) => {
+                    return a.attributes.priority - b.attributes.priority;
+                })
                 dispatch({
-                    type: GET_PRICE_LIST, payload: response.data.data.map(value => {
+                    type: GET_PRICE_LIST, payload: arr.map(value => {
                         value.attributes.price_lines.sort((a, b) => {
                             return a.priority - b.priority;
                         })
@@ -23,6 +26,7 @@ export function getPriceList() {
                             "titleUA": value.attributes.title_ua,
                             "titleEN": value.attributes.title_en,
                             "titlePL": value.attributes.title_pl,
+                            "priority": parseInt(value.attributes.priority),
                             "details": value.attributes.price_lines.map((detail) => {
                                 return {
                                     "id": parseInt(detail.id),
@@ -45,6 +49,13 @@ export function setPriceDetails(details) {
     return {
         type: SET_PRICE_DETAILS,
         payload: details
+    }
+}
+
+export function setPriceList(arr) {
+    return {
+        type: SET_PRICE_LIST,
+        payload: arr
     }
 }
 
@@ -76,6 +87,7 @@ export function createField(field, groupID) {
 }
 
 export function editField(field, groupID) {
+    console.log(field)
     return async dispatch => {
         axios
             .request({
@@ -131,6 +143,7 @@ export function createGroup(group) {
                     "title_ua": group.titleUA,
                     "title_en": group.titleEN || '',
                     "title_pl": group.titlePL || '',
+                    "priority": group.priority
                 }
             })
             .then(response => {
@@ -155,11 +168,13 @@ export function editGroup(group, id) {
                     "title_ua": group.titleUA,
                     "title_en": group.titleEN,
                     "title_pl": group.titlePL,
-                    "id": group.id
+                    "id": group.id,
+                    "priority": group.priority
+
                 }
             })
             .then(response => {
-                dispatch({type: EDIT_GROUP, payload: group});
+                dispatch({type: EDIT_GROUP, payload: {...group, ...{"id": id}}})
                 // message.success(`"${priceList.title}" створено!`);
             })
             .catch((error) => {

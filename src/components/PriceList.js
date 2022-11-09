@@ -14,7 +14,7 @@ import {useDispatch, useSelector} from "react-redux";
 import {
     createField, createGroup, deleteField, deleteGroup,
     editField, editGroup,
-    getPriceList, setPriceDetails
+    getPriceList, setPriceDetails, setPriceList
 } from "../redux/actions";
 import React, {useEffect, useRef, useState} from "react";
 import TextArea from "antd/es/input/TextArea";
@@ -82,10 +82,11 @@ export default function PriceList() {
     const handleChange = (value) => {
         let obj = priceList.filter(item => item.id === parseInt(value.key))[0];
         form.setFieldsValue({
-            titleUA: obj.titleUA,
-            titleEN: obj.titleEN,
-            titlePL: obj.titlePL,
-            details: obj.details || '',
+            "titleUA": obj.titleUA,
+            "titleEN": obj.titleEN,
+            "titlePL": obj.titlePL,
+            "priority": obj.priority,
+            "details": obj.details || '',
         });
         setActiveTitle(parseInt(value.key))
     };
@@ -118,6 +119,7 @@ export default function PriceList() {
 
     const onFinish = (values) => {
         dispatch(editGroup(values, activeTitle))
+
         values.details.map((item) => {
             item.id ?
                 dispatch(editField(item, activeTitle))
@@ -128,7 +130,6 @@ export default function PriceList() {
     };
     const createGroupName = (values) => {
         dispatch(createGroup(values))
-        dispatch(getPriceList());
     }
     const returnCheckedItems = () => {
         let detailsTrue = form.getFieldsValue().details.filter(value => value.status);
@@ -156,13 +157,11 @@ export default function PriceList() {
     }
 
     function transferField(key) {
-        console.log({"key": key, "field": form.getFieldsValue().details})
         let id;
         priceList.map(value1 => {
             value1.titleUA === transferFieldsForm.getFieldValue('title') && (id = value1.id)
         })
         let field = form.getFieldsValue().details[(key)];
-        console.log(field)
         let valueDetails = priceList.filter(value => value.id === activeTitle)
         form.setFieldsValue({
             titleUA: valueDetails[0].titleUA,
@@ -170,8 +169,8 @@ export default function PriceList() {
             titlePL: valueDetails[0].titlePL,
             details: valueDetails[0].details.filter(value => value.id !== valueDetails[0].details[key].id),
         });
-        console.log({...field, "id": valueDetails[0].details[key].id})
         dispatch(editField({...field, "id": valueDetails[0].details[key].id}, id))
+        dispatch(getPriceList());
         message.success(`Перенесено поле!`);
     }
 
@@ -195,10 +194,32 @@ export default function PriceList() {
         _price.splice(dragOverItem.current, 0, draggedItemContent);
         dragItem.current = null;
         dragOverItem.current = null;
-        _price = _price.map((value, index) => {return {...value, "priority": index}})
+        _price = _price.map((value, index) => {
+            return {...value, "priority": index}
+        })
         dispatch(setPriceDetails(_price))
         form.setFieldValue(
             "details", _price);
+    }
+
+
+    const dragItemMenu = useRef(null);
+    const dragOverItemMenu = useRef(null);
+
+    const handleSortMenu = () => {
+        let _price = [...priceList]
+        const draggedItemContent = _price.splice(dragItemMenu.current, 1)[0];
+        _price.splice(dragOverItemMenu.current, 0, draggedItemContent);
+        dragItemMenu.current = null;
+        dragOverItemMenu.current = null;
+        _price = _price.map((value, index) => {
+            return {...value, "priority": index}
+        })
+        dispatch(setPriceList(_price))
+        let obj = _price.filter(item => item.id === activeTitle)[0];
+        obj && form.setFieldValue(
+            "priority", obj.priority);
+        _price.map(value => dispatch(editGroup(value, value.id)))
     }
 
     return (
@@ -235,22 +256,30 @@ export default function PriceList() {
                         >
                             <Menu
                                 mode="inline"
-                                items={priceList.map(value => {
+                                items={priceList.map((value, index) => {
                                     return {
-                                        label: <Row justify={"space-between"} align={"middle"}>
-                                            {value.titleUA}
-                                            {
-                                                priceListIsEditing && <DeleteOutlined onClick={() => {
-                                                    showPromiseConfirm(() => {
-                                                        dispatch(deleteGroup(value))
-                                                        setActiveTitle(0)
-                                                        form.setFieldsValue({
-                                                            details: []
-                                                        })
-                                                    }, 'групу')
-                                                }}/>
-                                            }
-                                        </Row>,
+                                        label:
+                                            <Row
+                                                onDragStart={(e) => dragItemMenu.current = index}
+                                                onDragEnter={(e) => dragOverItemMenu.current = index}
+                                                onDragEnd={handleSortMenu}
+                                                onDragOver={(e) => e.preventDefault()}
+                                                style={priceListIsEditing && {cursor: "move"}}
+                                                draggable={priceListIsEditing} justify={"space-between"}
+                                                align={"middle"}>
+                                                {value.titleUA}
+                                                {
+                                                    priceListIsEditing && <DeleteOutlined onClick={() => {
+                                                        showPromiseConfirm(() => {
+                                                            dispatch(deleteGroup(value))
+                                                            setActiveTitle(0)
+                                                            form.setFieldsValue({
+                                                                details: []
+                                                            })
+                                                        }, 'групу')
+                                                    }}/>
+                                                }
+                                            </Row>,
                                         key: value.id
                                     }
                                 })}
@@ -332,6 +361,12 @@ export default function PriceList() {
                                                     />
                                                 </Form.Item>
                                             </Col>
+                                            <Form.Item
+                                                name={"priority"}
+                                                style={{display: "none"}}
+                                            >
+                                                <InputNumber/>
+                                            </Form.Item>
                                         </Row>
                                         <Form.List
                                             name={'details'}
