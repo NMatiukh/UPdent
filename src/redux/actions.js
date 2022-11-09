@@ -147,9 +147,8 @@ export function createGroup(group) {
                 }
             })
             .then(response => {
-                dispatch({type: CREATE_GROUP, payload: {...group, "id": response.data.insertId}});
+                dispatch({type: CREATE_GROUP, payload: {...group, "id": parseInt(response.data.data.id)}});
                 message.success(`"${group.titleUA}" створено!`);
-                console.log(response)
             })
             .catch((error) => {
                 message.error('Помика! Не вдалось створити!');
