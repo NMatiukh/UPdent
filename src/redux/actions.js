@@ -105,6 +105,7 @@ export function editField(field, groupID) {
             })
             .then(response => {
                 dispatch({type: EDIT_FIELD, payload: {...field, ...{"groupID": groupID}}});
+                dispatch(getPriceList())
                 // message.success(`"${priceList.title}" створено!`);
             })
             .catch((error) => {

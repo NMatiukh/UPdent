@@ -152,7 +152,7 @@ export default function PriceList() {
         form.setFieldsValue({
             details: detailsFalse
         })
-        dispatch(getPriceList());
+        // dispatch(getPriceList());
         message.success(`Видалено!`);
     }
 
