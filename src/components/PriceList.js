@@ -310,8 +310,8 @@ export default function PriceList() {
                                         disabled={!priceListIsEditing}
                                         onChange={changeActiveBox}
                                     >
-                                        <Row justify={"space-between"} style={{width: "70%"}}>
-                                            <Col span={6}>
+                                        <Row justify={"space-between"} style={{width: "80%"}}>
+                                            <Col span={7}>
                                                 <Form.Item
                                                     label={"ua"}
                                                     name={"titleUA"}
@@ -333,7 +333,7 @@ export default function PriceList() {
                                                     />
                                                 </Form.Item>
                                             </Col>
-                                            <Col span={6}>
+                                            <Col span={7}>
                                                 <Form.Item
                                                     label={"en"}
                                                     name={"titleEN"}
@@ -347,7 +347,7 @@ export default function PriceList() {
                                                     />
                                                 </Form.Item>
                                             </Col>
-                                            <Col span={6}>
+                                            <Col span={7}>
                                                 <Form.Item
                                                     label={"pl"}
                                                     name={"titlePL"}
@@ -428,6 +428,7 @@ export default function PriceList() {
                                                                             {
                                                                                 priceListIsEditing &&
                                                                                 <Form.Item
+
                                                                                     name={[index, "status"]}
                                                                                     valuePropName="checked"
                                                                                 >
@@ -439,6 +440,7 @@ export default function PriceList() {
                                                                             <Form.Item
                                                                                 label={"ua"}
                                                                                 name={[index, "subtitleUA"]}
+                                                                                style={{marginBottom: 5}}
                                                                                 rules={
                                                                                     [
                                                                                         {
@@ -462,6 +464,7 @@ export default function PriceList() {
                                                                             <Form.Item
                                                                                 label={"en"}
                                                                                 name={[index, "subtitleEN"]}
+                                                                                style={{marginBottom: 5}}
                                                                             >
                                                                                 <TextArea maxLength={71}
                                                                                           autoSize={{
@@ -477,6 +480,7 @@ export default function PriceList() {
                                                                             <Form.Item
                                                                                 label={"pl"}
                                                                                 name={[index, "subtitlePL"]}
+                                                                                style={{marginBottom: 5}}
                                                                             >
                                                                                 <TextArea maxLength={71}
                                                                                           autoSize={{
