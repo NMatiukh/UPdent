@@ -37,11 +37,11 @@ export function getPriceList() {
                                     "price": parseInt(detail.price_ua),
                                     "pricePL": parseInt(detail.price_pl),
                                     "priceEN": parseInt(detail.price_en),
-                                    "priceUS":parseInt(detail.price_us),
+                                    "priceUS": parseInt(detail.price_us),
                                     "price1": parseInt(detail.price_ua1),
                                     "pricePL1": parseInt(detail.price_pl1),
                                     "priceEN1": parseInt(detail.price_en1),
-                                    "priceUS1":parseInt(detail.price_us1),
+                                    "priceUS1": parseInt(detail.price_us1),
                                     "priority": parseInt(detail.priority)
                                 }
                             })
@@ -235,3 +235,4 @@ export function deleteGroup(group) {
             })
     }
 }
+

@@ -324,7 +324,6 @@ export default function PriceList() {
                         {
                             activeTitle ?
                                 <Col span={24}>
-
                                     <Form
                                         form={form}
                                         name={"editPriceListForTitle"}
@@ -413,7 +412,7 @@ export default function PriceList() {
                                                                 {
                                                                     activeTitle &&
                                                                     <Text strong>
-                                                                        Ціна, грн
+                                                                        Ціна{priceListIsEditing && ', грн'}
                                                                     </Text>
                                                                 }
                                                             </Col>
@@ -523,6 +522,8 @@ export default function PriceList() {
                                                                         <Col span={mainColSpanValues.price}>
                                                                             <Form.Item
                                                                                 name={[index, "price"]}
+                                                                                label={!priceListIsEditing ? "₴" : ''}
+                                                                                labelCol={{span: 4}}
                                                                                 rules={
                                                                                     [
                                                                                         {
@@ -536,12 +537,69 @@ export default function PriceList() {
                                                                                         },
                                                                                     ]
                                                                                 }
+                                                                                style={{marginBottom: 5}}
+
                                                                             >
                                                                                 <InputNumber style={{
                                                                                     background: "white",
                                                                                     color: "black"
                                                                                 }}/>
                                                                             </Form.Item>
+                                                                            {
+                                                                                !priceListIsEditing &&
+                                                                                <>
+                                                                                    <Form.Item
+                                                                                        name={[index, "priceEN"]}
+                                                                                        label={"€"}
+                                                                                        labelCol={{span: 4}}
+                                                                                        rules={
+                                                                                            [
+                                                                                                {
+                                                                                                    required: true,
+                                                                                                    message: 'Введіть ціну!'
+                                                                                                },
+                                                                                                {
+                                                                                                    type: 'number',
+                                                                                                    min: 0,
+                                                                                                    message: 'Введіть ціну більшу 0!'
+                                                                                                },
+                                                                                            ]
+                                                                                        }
+                                                                                        style={{marginBottom: 5}}
+                                                                                    >
+                                                                                        <InputNumber style={{
+                                                                                            background: "white",
+                                                                                            color: "black"
+                                                                                        }}/>
+                                                                                    </Form.Item>
+                                                                                    <Form.Item
+                                                                                        name={[index, "pricePL"]}
+                                                                                        label={"zł"}
+                                                                                        labelCol={{span: 4}}
+                                                                                        rules={
+                                                                                            [
+                                                                                                {
+                                                                                                    required: true,
+                                                                                                    message: 'Введіть ціну!'
+                                                                                                },
+                                                                                                {
+                                                                                                    type: 'number',
+                                                                                                    min: 0,
+                                                                                                    message: 'Введіть ціну більшу 0!'
+                                                                                                },
+                                                                                            ]
+                                                                                        }
+                                                                                        style={{marginBottom: 5}}
+
+                                                                                    >
+                                                                                        <InputNumber style={{
+                                                                                            background: "white",
+                                                                                            color: "black"
+                                                                                        }}/>
+                                                                                    </Form.Item>
+
+                                                                                </>
+                                                                            }
                                                                         </Col>
                                                                         <Col span={mainColSpanValues.price}>
                                                                             <Form.Item
@@ -559,12 +617,65 @@ export default function PriceList() {
                                                                                         },
                                                                                     ]
                                                                                 }
+                                                                                style={{marginBottom: 5}}
+
                                                                             >
                                                                                 <InputNumber style={{
                                                                                     background: "white",
                                                                                     color: "black"
                                                                                 }}/>
                                                                             </Form.Item>
+                                                                            {
+                                                                                !priceListIsEditing &&
+                                                                                <>
+                                                                                    <Form.Item
+                                                                                        name={[index, "priceEN1"]}
+                                                                                        rules={
+                                                                                            [
+                                                                                                {
+                                                                                                    required: true,
+                                                                                                    message: 'Введіть ціну!'
+                                                                                                },
+                                                                                                {
+                                                                                                    type: 'number',
+                                                                                                    min: 0,
+                                                                                                    message: 'Введіть ціну більшу 0!'
+                                                                                                },
+                                                                                            ]
+                                                                                        }
+                                                                                        style={{marginBottom: 5}}
+                                                                                    >
+                                                                                        <InputNumber style={{
+                                                                                            background: "white",
+                                                                                            color: "black"
+                                                                                        }}/>
+                                                                                    </Form.Item>
+                                                                                    <Form.Item
+                                                                                        name={[index, "pricePL1"]}
+                                                                                        rules={
+                                                                                            [
+                                                                                                {
+                                                                                                    required: true,
+                                                                                                    message: 'Введіть ціну!'
+                                                                                                },
+                                                                                                {
+                                                                                                    type: 'number',
+                                                                                                    min: 0,
+                                                                                                    message: 'Введіть ціну більшу 0!'
+                                                                                                },
+                                                                                            ]
+                                                                                        }
+                                                                                        style={{marginBottom: 5}}
+
+                                                                                    >
+                                                                                        <InputNumber style={{
+                                                                                            background: "white",
+                                                                                            color: "black"
+                                                                                        }}/>
+                                                                                    </Form.Item>
+
+                                                                                </>
+                                                                            }
                                                                         </Col>
                                                                         <Col span={mainColSpanValues.button}>
                                                                             {
@@ -802,7 +913,7 @@ export default function PriceList() {
                         </Form.Item>
                         <Col span={2}>
                             <Text
-                                type={"secondary"}>{(7 / 8).toFixed((inputNumberValueUSD <= 2 && inputNumberValueUSD >= 0) && inputNumberValueUSD)}</Text>
+                                type={"secondary"}>{(7 / 8).toFixed(!!inputNumberValueUSD ? ((inputNumberValueUSD <= 2 && inputNumberValueUSD >= 0) && inputNumberValueUSD) : (inputNumberValueUSD === 0 ? inputNumberValueUSD : 2))}</Text>
                         </Col>
                     </Row>
                     <Row justify={"space-around"}>
@@ -841,7 +952,7 @@ export default function PriceList() {
                         </Form.Item>
                         <Col span={2}>
                             <Text
-                                type={"secondary"}>{(7 / 8).toFixed((inputNumberValueEUR <= 2 && inputNumberValueEUR >= 0) && inputNumberValueEUR)}</Text>
+                                type={"secondary"}>{(7 / 8).toFixed(!!inputNumberValueEUR ? ((inputNumberValueEUR <= 2 && inputNumberValueEUR >= 0) && inputNumberValueEUR) : (inputNumberValueEUR === 0 ? inputNumberValueEUR : 2))}</Text>
                         </Col>
                     </Row>
                     <Row justify={"space-around"}>
@@ -880,7 +991,7 @@ export default function PriceList() {
                         </Form.Item>
                         <Col span={2}>
                             <Text
-                                type={"secondary"}>{(7 / 8).toFixed((inputNumberValuePLN <= 2 && inputNumberValuePLN >= 0) && inputNumberValuePLN)}</Text>
+                                type={"secondary"}>{(7 / 8).toFixed(!!inputNumberValuePLN ? ((inputNumberValuePLN <= 2 && inputNumberValuePLN >= 0) && inputNumberValuePLN) : (inputNumberValuePLN === 0 ? inputNumberValuePLN : 2))}</Text>
                         </Col>
                     </Row>
                 </Form>
