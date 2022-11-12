@@ -1,14 +1,15 @@
 import {
     CREATE_FIELD, CREATE_GROUP,
     DELETE_FIELD, DELETE_GROUP, EDIT_FIELD, EDIT_GROUP, GET_FIELDS, GET_GROUPS,
-    GET_PRICE_LIST, SET_PRICE_DETAILS, SET_PRICE_LIST
+    GET_PRICE_LIST, PRICE_DATA, SET_PRICE_DETAILS, SET_PRICE_LIST
 } from "../types";
 import {arrayWithDelete} from "./someFunctions";
 
 const initialState = {
     priceList: [],
     groups: [],
-    fields: []
+    fields: [],
+    priceData: {}
 }
 
 export const priceListReducer = (state = initialState, action) => {
@@ -62,7 +63,13 @@ export const priceListReducer = (state = initialState, action) => {
             }
         case EDIT_GROUP:
             return {
-                ...state, priceList: state.priceList.map(value => value.id === action.payload.id ? action.payload : value)
+                ...state,
+                priceList: state.priceList.map(value => value.id === action.payload.id ? action.payload : value)
+            }
+        case PRICE_DATA:
+            return {
+                ...state,
+                priceData: action.payload,
             }
         default:
             return state

@@ -5,8 +5,7 @@ import {
     Input,
     InputNumber,
     Menu,
-    Modal,
-    Row,
+    Modal, Row,
     Select, Spin, Typography
 } from "antd";
 import {ExclamationCircleOutlined, DeleteOutlined} from "@ant-design/icons";
@@ -14,7 +13,7 @@ import {useDispatch, useSelector} from "react-redux";
 import {
     createField, createGroup, deleteField, deleteGroup,
     editField, editGroup,
-    getPriceList, setPriceDetails, setPriceList
+    getPriceList, setPriceData, setPriceDetails, setPriceList
 } from "../redux/actions";
 import React, {useEffect, useRef, useState} from "react";
 import TextArea from "antd/es/input/TextArea";
@@ -38,10 +37,13 @@ export default function PriceList() {
     const [form] = Form.useForm();
     const [addGroupNameForm] = Form.useForm();
     const [transferFieldsForm] = Form.useForm();
+    const [priceForm] = Form.useForm();
     const dispatch = useDispatch();
     const priceList = useSelector(state => state.priceList.priceList)
     const [isModalAddVisible, setIsModalAddVisible] = useState(false);
     const [isModalTransferFieldsVisible, setIsModalTransferFieldsVisible] = useState(false);
+    const [isModalPrice, setIsModalPrice] = useState(false);
+
 
     const [activeTitle, setActiveTitle] = useState(0)
     const [activeBox, setActiveBox] = useState(false)
@@ -119,6 +121,18 @@ export default function PriceList() {
             })
     }
 
+    const submitPriceForm = (activeForm, setIsModalVisible) => {
+        // activeForm.validateFields(['titleUA'])
+        //     .then(() => {
+        //         activeForm.submit();
+        //         handleOk(setIsModalVisible)
+        //     })
+        //     .catch(status => {
+        //         console.error(status)
+        //     })
+        activeForm.submit();
+        handleOk(setIsModalVisible)
+    }
     const onFinish = (values) => {
         dispatch(editGroup(values, activeTitle))
 
@@ -132,6 +146,9 @@ export default function PriceList() {
     };
     const createGroupName = (values) => {
         dispatch(createGroup(values))
+    }
+    const createPriceFormValues = (values) => {
+        dispatch(setPriceData(values));
     }
     const returnCheckedItems = () => {
         let detailsTrue = form.getFieldsValue().details.filter(value => value.status);
@@ -207,6 +224,10 @@ export default function PriceList() {
 
     const dragItemMenu = useRef(null);
     const dragOverItemMenu = useRef(null);
+    const [inputNumberValueEUR, setInputNumberValueEUR] = useState(null);
+    const [inputNumberValueUSD, setInputNumberValueUSD] = useState(null);
+    const [inputNumberValuePLN, setInputNumberValuePLN] = useState(null);
+
 
     const handleSortMenu = () => {
         let _price = [...priceList]
@@ -396,9 +417,8 @@ export default function PriceList() {
                                                                     </Text>
                                                                 }
                                                             </Col>
-                                                            <Col span={mainColSpanValues.button}>
-
-                                                            </Col>
+                                                            <Col span={mainColSpanValues.price}/>
+                                                            <Col span={mainColSpanValues.button}/>
                                                         </Row>
                                                         <div
                                                             style={{
@@ -419,13 +439,13 @@ export default function PriceList() {
                                                                 {fields.map((field, index) => (
                                                                     <Row key={field.key}
                                                                          justify={"space-between"}
-                                                                         style={{marginBottom: "20px", cursor: "move"}}
+                                                                         style={{...{marginBottom: "20px"}, ...(priceListIsEditing && {cursor: "move"})}}
                                                                          draggable={priceListIsEditing}
                                                                          onDragStart={(e) => dragItem.current = index}
                                                                          onDragEnter={(e) => dragOverItem.current = index}
                                                                          onDragEnd={handleSort}
                                                                          onDragOver={(e) => e.preventDefault()}
-                                                                         id={"field"}
+                                                                         id={priceListIsEditing ? "field" : ''}
                                                                     >
                                                                         <Col span={mainColSpanValues.checkbox}>
                                                                             {
@@ -523,6 +543,29 @@ export default function PriceList() {
                                                                                 }}/>
                                                                             </Form.Item>
                                                                         </Col>
+                                                                        <Col span={mainColSpanValues.price}>
+                                                                            <Form.Item
+                                                                                name={[index, "price1"]}
+                                                                                rules={
+                                                                                    [
+                                                                                        {
+                                                                                            required: true,
+                                                                                            message: 'Введіть ціну!'
+                                                                                        },
+                                                                                        {
+                                                                                            type: 'number',
+                                                                                            min: 0,
+                                                                                            message: 'Введіть ціну більшу 0!'
+                                                                                        },
+                                                                                    ]
+                                                                                }
+                                                                            >
+                                                                                <InputNumber style={{
+                                                                                    background: "white",
+                                                                                    color: "black"
+                                                                                }}/>
+                                                                            </Form.Item>
+                                                                        </Col>
                                                                         <Col span={mainColSpanValues.button}>
                                                                             {
                                                                                 priceListIsEditing &&
@@ -577,7 +620,13 @@ export default function PriceList() {
                                                                                 onClick={() => showPromiseConfirm(massDelete, 'вибрані поля')}
                                                                                 type={"primary"}>Видалити</Button>
                                                                     </Row>
-                                                                    <Row>
+                                                                    <Row justify={"space-between"}
+                                                                         style={{width: "18%"}}>
+                                                                        <Button onClick={() => {
+                                                                            showModal(setIsModalPrice)
+                                                                        }}>
+                                                                            Курс
+                                                                        </Button>
                                                                         <Button
                                                                             htmlType={"submit"}
                                                                             type={"primary"}
@@ -689,6 +738,151 @@ export default function PriceList() {
                     >
                         <Input placeholder="Введіть групу pl"/>
                     </Form.Item>
+                </Form>
+            </Modal>
+            <Modal
+                title="Курс"
+                centered
+                destroyOnClose={true}
+                visible={isModalPrice}
+                width={700}
+                footer={
+                    <Button
+                        key={"addOk"}
+                        onClick={() => submitPriceForm(priceForm, setIsModalPrice)}
+                        type={"primary"}
+                    >
+                        Підтвердити
+                    </Button>
+                }
+                onOk={() => submitPriceForm(priceForm, setIsModalPrice)}
+                onCancel={() => handleCancel(setIsModalPrice)}
+            >
+                <Form
+                    form={priceForm}
+                    name={"priceForm"}
+                    requiredMark={false}
+                    preserve={false}
+                    onFinish={createPriceFormValues}
+                    style={{margin: "auto"}}
+                >
+                    <Row justify={"space-around"}>
+                        <Form.Item
+                            name="USD"
+                            hasFeedback
+                            rules={
+                                [
+                                    {
+                                        type: 'number',
+                                        min: 0,
+                                    },
+                                ]
+                            }
+                        >
+                            <InputNumber addonAfter="$"/>
+                        </Form.Item>
+                        <Form.Item
+                            name="usdRounding"
+                            hasFeedback
+                            rules={
+                                [
+                                    {
+                                        type: 'number',
+                                        min: 0,
+                                        max: 2,
+                                        message: ''
+                                    },
+                                ]
+                            }
+                            initialValue={2}
+                        >
+                            <InputNumber onChange={(e) => {
+                                setInputNumberValueUSD(e)
+                            }}/>
+                        </Form.Item>
+                        <Col span={2}>
+                            <Text
+                                type={"secondary"}>{(7 / 8).toFixed((inputNumberValueUSD <= 2 && inputNumberValueUSD >= 0) && inputNumberValueUSD)}</Text>
+                        </Col>
+                    </Row>
+                    <Row justify={"space-around"}>
+                        <Form.Item
+                            name="EUR"
+                            hasFeedback
+                            rules={
+                                [
+                                    {
+                                        type: 'number',
+                                        min: 0,
+                                    },
+                                ]
+                            }
+                        >
+                            <InputNumber addonAfter="€"/>
+                        </Form.Item>
+                        <Form.Item
+                            name="eurRounding"
+                            hasFeedback
+                            initialValue={2}
+                            rules={
+                                [
+                                    {
+                                        type: 'number',
+                                        min: 0,
+                                        max: 2,
+                                        message: ''
+                                    },
+                                ]
+                            }
+                        >
+                            <InputNumber onChange={(e) => {
+                                setInputNumberValueEUR(e)
+                            }}/>
+                        </Form.Item>
+                        <Col span={2}>
+                            <Text
+                                type={"secondary"}>{(7 / 8).toFixed((inputNumberValueEUR <= 2 && inputNumberValueEUR >= 0) && inputNumberValueEUR)}</Text>
+                        </Col>
+                    </Row>
+                    <Row justify={"space-around"}>
+                        <Form.Item
+                            name="PLN"
+                            hasFeedback
+                            rules={
+                                [
+                                    {
+                                        type: 'number',
+                                        min: 0,
+                                    },
+                                ]
+                            }
+                        >
+                            <InputNumber addonAfter="zł"/>
+                        </Form.Item>
+                        <Form.Item
+                            name="plnRounding"
+                            hasFeedback
+                            rules={
+                                [
+                                    {
+                                        type: 'number',
+                                        min: 0,
+                                        max: 2,
+                                        message: ''
+                                    },
+                                ]
+                            }
+                            initialValue={2}
+                        >
+                            <InputNumber onChange={(e) => {
+                                setInputNumberValuePLN(e)
+                            }}/>
+                        </Form.Item>
+                        <Col span={2}>
+                            <Text
+                                type={"secondary"}>{(7 / 8).toFixed((inputNumberValuePLN <= 2 && inputNumberValuePLN >= 0) && inputNumberValuePLN)}</Text>
+                        </Col>
+                    </Row>
                 </Form>
             </Modal>
         </div>

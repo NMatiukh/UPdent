@@ -1,7 +1,7 @@
 import {
     CREATE_FIELD, CREATE_GROUP,
     DELETE_FIELD, DELETE_GROUP, EDIT_FIELD,
-    EDIT_GROUP, GET_PRICE_LIST, SET_PRICE_DETAILS, SET_PRICE_LIST
+    EDIT_GROUP, GET_PRICE_LIST, PRICE_DATA, SET_PRICE_DETAILS, SET_PRICE_LIST
 } from "./types";
 import {message} from "antd";
 import axios from "axios";
@@ -35,12 +35,44 @@ export function getPriceList() {
                                     "subtitlePL": detail.title_pl,
                                     "sectionId": parseInt(detail.price_section_id),
                                     "price": parseInt(detail.price_ua),
+                                    "pricePL": parseInt(detail.price_pl),
+                                    "priceEN": parseInt(detail.price_en),
+                                    "priceUS":parseInt(detail.price_us),
+                                    "price1": parseInt(detail.price_ua1),
+                                    "pricePL1": parseInt(detail.price_pl1),
+                                    "priceEN1": parseInt(detail.price_en1),
+                                    "priceUS1":parseInt(detail.price_us1),
                                     "priority": parseInt(detail.priority)
                                 }
                             })
                         }
                     })
                 })
+            })
+    }
+}
+
+export function setPriceData(data) {
+    return async dispatch => {
+        axios
+            .request({
+                method: "POST",
+                url: URL + '/currencies',
+                data: {
+                    "euro": data.EUR,
+                    "euro_r": data.eurRounding,
+                    "dollar": data.USD,
+                    "dollar_r": data.usdRounding,
+                    "zloty": data.PLN,
+                    "zloty_r": data.plnRounding
+                }
+            })
+            .then(response => {
+                dispatch({type: PRICE_DATA, payload: data});
+            })
+            .catch((error) => {
+                message.error('Помика! Не вдалось створити!');
+                console.error(error)
             })
     }
 }
@@ -71,6 +103,7 @@ export function createField(field, groupID) {
                     "title_en": field.subtitleEN || '',
                     "title_pl": field.subtitlePL || '',
                     "price_ua": field.price,
+                    "price_ua1": field.price1,
                     "price_section_id": groupID,
                     "priority": field.priority
                 }
@@ -99,6 +132,7 @@ export function editField(field, groupID) {
                     "title_en": field.subtitleEN || '',
                     "title_pl": field.subtitlePL || '',
                     "price_ua": field.price,
+                    "price_ua1": field.price1,
                     "price_section_id": parseInt(groupID),
                     "priority": field.priority
                 }
