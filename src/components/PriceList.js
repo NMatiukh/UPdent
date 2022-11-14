@@ -245,6 +245,25 @@ export default function PriceList() {
         _price.map(value => dispatch(editGroup(value, value.id)))
     }
 
+    function switchPriceR(value) {
+        switch (value) {
+            case -3:
+                return "9000.00"
+            case -2:
+                return '9900.00'
+            case -1:
+                return '9990.00'
+            case 0:
+                return '9999.00'
+            case 1:
+                return '9999.90'
+            case 2:
+                return '9999.99'
+            default:
+                return '9999.99'
+        }
+    }
+
     return (
         <div onClick={() => {
             activeTitle && changeActiveBox()
@@ -253,6 +272,7 @@ export default function PriceList() {
                 <Title>Прайс-лист</Title>
                 <Button type={"primary"} onClick={() => {
                     setPriceListIsEditing(!priceListIsEditing)
+                    dispatch(getPriceList());
                 }}>
                     {priceListIsEditing ? "Переглядати" : "Редагувати"}
                 </Button>
@@ -677,34 +697,87 @@ export default function PriceList() {
                                                                                 </>
                                                                             }
                                                                         </Col>
-                                                                        <Col span={mainColSpanValues.button}>
-                                                                            {
-                                                                                priceListIsEditing &&
-                                                                                <Row justify={"space-evenly"}>
-                                                                                    <Button
-                                                                                        type={"dashed"}
-                                                                                        onClick={() => {
-                                                                                            setOneTransferField(field.name)
-                                                                                            showModal(setIsModalTransferFieldsVisible)
-                                                                                        }}
-                                                                                    >Перенести</Button>
-                                                                                    <Button
-                                                                                        danger
-                                                                                        type={"primary"}
-                                                                                        onClick={() => showPromiseConfirm(() => {
-                                                                                            console.log({
-                                                                                                "from": form.getFieldsValue().details,
-                                                                                                "fields": fields
-                                                                                            })
-                                                                                            dispatch(deleteField(form.getFieldsValue().details[field.name], activeTitle))
-                                                                                            remove(field.name)
-                                                                                        }, 'поле')}
-                                                                                    >
-                                                                                        Видалити
-                                                                                    </Button>
-                                                                                </Row>
-                                                                            }
-                                                                        </Col>
+                                                                        {
+                                                                            priceListIsEditing &&
+                                                                            <Col span={mainColSpanValues.button}>
+                                                                                {
+                                                                                    priceListIsEditing &&
+                                                                                    <Row justify={"space-evenly"}>
+                                                                                        <Button
+                                                                                            type={"dashed"}
+                                                                                            onClick={() => {
+                                                                                                setOneTransferField(field.name)
+                                                                                                showModal(setIsModalTransferFieldsVisible)
+                                                                                            }}
+                                                                                        >Перенести</Button>
+                                                                                        <Button
+                                                                                            danger
+                                                                                            type={"primary"}
+                                                                                            onClick={() => showPromiseConfirm(() => {
+                                                                                                console.log({
+                                                                                                    "from": form.getFieldsValue().details,
+                                                                                                    "fields": fields
+                                                                                                })
+                                                                                                dispatch(deleteField(form.getFieldsValue().details[field.name], activeTitle))
+                                                                                                remove(field.name)
+                                                                                            }, 'поле')}
+                                                                                        >
+                                                                                            Видалити
+                                                                                        </Button>
+                                                                                    </Row>
+                                                                                }
+                                                                            </Col>
+                                                                        }
+                                                                        {
+                                                                            !priceListIsEditing &&
+                                                                            <Col span={mainColSpanValues.price}>
+                                                                                <Form.Item
+                                                                                    style={{marginBottom: 5}}
+                                                                                >
+                                                                                    <InputNumber style={{
+                                                                                        background: "white",
+                                                                                        color: "black",
+                                                                                        borderColor: "white"
+                                                                                    }}/>
+                                                                                </Form.Item>
+                                                                                <Form.Item
+                                                                                    name={[index, "priceUS"]}
+                                                                                    label={"$"}
+                                                                                    labelCol={{span: 4}}
+                                                                                    style={{marginBottom: 5}}
+
+                                                                                >
+                                                                                    <InputNumber style={{
+                                                                                        background: "white",
+                                                                                        color: "black"
+                                                                                    }}/>
+                                                                                </Form.Item>
+                                                                            </Col>
+                                                                        }
+
+                                                                        {
+                                                                            !priceListIsEditing &&
+                                                                            <Col span={mainColSpanValues.price}>
+                                                                                <Form.Item
+                                                                                    style={{marginBottom: 5}}
+                                                                                >
+                                                                                    <InputNumber style={{
+                                                                                        background: "white",
+                                                                                        color: "black",
+                                                                                        borderColor: "white"
+                                                                                    }}/>
+                                                                                </Form.Item>
+                                                                                <Form.Item
+                                                                                    name={[index, "priceUS1"]}
+                                                                                    style={{marginBottom: 5}}
+                                                                                >
+                                                                                    <InputNumber style={{
+                                                                                        background: "white",
+                                                                                        color: "black"
+                                                                                    }}/>
+                                                                                </Form.Item>
+                                                                            </Col>
+                                                                        }
                                                                     </Row>
                                                                 ))}
                                                             </InfiniteScroll>
@@ -856,7 +929,7 @@ export default function PriceList() {
                 centered
                 destroyOnClose={true}
                 visible={isModalPrice}
-                width={700}
+                width={600}
                 footer={
                     <Button
                         key={"addOk"}
@@ -877,121 +950,154 @@ export default function PriceList() {
                     onFinish={createPriceFormValues}
                     style={{margin: "auto"}}
                 >
-                    <Row justify={"space-around"}>
-                        <Form.Item
-                            name="USD"
-                            hasFeedback
-                            rules={
-                                [
-                                    {
-                                        type: 'number',
-                                        min: 0,
-                                    },
-                                ]
-                            }
-                        >
-                            <InputNumber addonAfter="$"/>
-                        </Form.Item>
-                        <Form.Item
-                            name="usdRounding"
-                            hasFeedback
-                            rules={
-                                [
-                                    {
-                                        type: 'number',
-                                        min: 0,
-                                        max: 2,
-                                        message: ''
-                                    },
-                                ]
-                            }
-                            initialValue={2}
-                        >
-                            <InputNumber onChange={(e) => {
-                                setInputNumberValueUSD(e)
-                            }}/>
-                        </Form.Item>
-                        <Col span={2}>
-                            <Text
-                                type={"secondary"}>{(7 / 8).toFixed(!!inputNumberValueUSD ? ((inputNumberValueUSD <= 2 && inputNumberValueUSD >= 0) && inputNumberValueUSD) : (inputNumberValueUSD === 0 ? inputNumberValueUSD : 2))}</Text>
+                    <Row justify={"space-around"} style={{marginBottom: 10}}>
+                        <Col span={7}>
+                            Валюта
+                        </Col>
+                        <Col span={7}>
+                            К-сть знаків після коми
+                        </Col>
+                        <Col span={3}>
+                            Приклад
                         </Col>
                     </Row>
                     <Row justify={"space-around"}>
-                        <Form.Item
-                            name="EUR"
-                            hasFeedback
-                            rules={
-                                [
-                                    {
-                                        type: 'number',
-                                        min: 0,
-                                    },
-                                ]
-                            }
-                        >
-                            <InputNumber addonAfter="€"/>
-                        </Form.Item>
-                        <Form.Item
-                            name="eurRounding"
-                            hasFeedback
-                            initialValue={2}
-                            rules={
-                                [
-                                    {
-                                        type: 'number',
-                                        min: 0,
-                                        max: 2,
-                                        message: ''
-                                    },
-                                ]
-                            }
-                        >
-                            <InputNumber onChange={(e) => {
-                                setInputNumberValueEUR(e)
-                            }}/>
-                        </Form.Item>
-                        <Col span={2}>
+                        <Col span={7}>
+                            <Form.Item
+                                name="USD"
+                                hasFeedback
+                                rules={
+                                    [
+                                        {
+                                            type: 'number',
+                                            min: 0,
+                                        },
+                                    ]
+                                }
+                            >
+                                <InputNumber addonAfter="$"/>
+                            </Form.Item>
+                        </Col>
+                        <Col span={7}>
+                            <Form.Item
+                                name="usdRounding"
+                                hasFeedback
+                                rules={
+                                    [
+                                        {
+                                            type: 'number',
+                                            min: -3,
+                                            max: 2,
+                                            message: ''
+                                        },
+                                    ]
+                                }
+                                initialValue={2}
+                            >
+                                <InputNumber onChange={(e) => {
+                                    setInputNumberValueUSD(e)
+                                }}/>
+                            </Form.Item>
+                        </Col>
+                        <Col span={3}>
                             <Text
-                                type={"secondary"}>{(7 / 8).toFixed(!!inputNumberValueEUR ? ((inputNumberValueEUR <= 2 && inputNumberValueEUR >= 0) && inputNumberValueEUR) : (inputNumberValueEUR === 0 ? inputNumberValueEUR : 2))}</Text>
+                                type={"secondary"}>
+                                {
+                                    switchPriceR(inputNumberValueUSD)
+                                }
+                            </Text>
                         </Col>
                     </Row>
                     <Row justify={"space-around"}>
-                        <Form.Item
-                            name="PLN"
-                            hasFeedback
-                            rules={
-                                [
-                                    {
-                                        type: 'number',
-                                        min: 0,
-                                    },
-                                ]
-                            }
-                        >
-                            <InputNumber addonAfter="zł"/>
-                        </Form.Item>
-                        <Form.Item
-                            name="plnRounding"
-                            hasFeedback
-                            rules={
-                                [
-                                    {
-                                        type: 'number',
-                                        min: 0,
-                                        max: 2,
-                                        message: ''
-                                    },
-                                ]
-                            }
-                            initialValue={2}
-                        >
-                            <InputNumber onChange={(e) => {
-                                setInputNumberValuePLN(e)
-                            }}/>
-                        </Form.Item>
-                        <Col span={2}>
+                        <Col span={7}>
+                            <Form.Item
+                                name="EUR"
+                                hasFeedback
+                                rules={
+                                    [
+                                        {
+                                            type: 'number',
+                                            min: 0,
+                                        },
+                                    ]
+                                }
+                            >
+                                <InputNumber addonAfter="€"/>
+                            </Form.Item>
+                        </Col>
+                        <Col span={7}>
+                            <Form.Item
+                                name="eurRounding"
+                                hasFeedback
+                                initialValue={2}
+                                rules={
+                                    [
+                                        {
+                                            type: 'number',
+                                            min: -3,
+                                            max: 2,
+                                            message: ''
+                                        },
+                                    ]
+                                }
+                            >
+                                <InputNumber onChange={(e) => {
+                                    setInputNumberValueEUR(e)
+                                }}/>
+                            </Form.Item>
+                        </Col>
+                        <Col span={3}>
                             <Text
-                                type={"secondary"}>{(7 / 8).toFixed(!!inputNumberValuePLN ? ((inputNumberValuePLN <= 2 && inputNumberValuePLN >= 0) && inputNumberValuePLN) : (inputNumberValuePLN === 0 ? inputNumberValuePLN : 2))}</Text>
+                                type={"secondary"}>
+                                {
+                                    switchPriceR(inputNumberValueEUR)
+                                }
+                            </Text>
+                        </Col>
+                    </Row>
+                    <Row justify={"space-around"}>
+                        <Col span={7}>
+                            <Form.Item
+                                name="PLN"
+                                hasFeedback
+                                rules={
+                                    [
+                                        {
+                                            type: 'number',
+                                            min: 0,
+                                        },
+                                    ]
+                                }
+                            >
+                                <InputNumber addonAfter="zł"/>
+                            </Form.Item>
+                        </Col>
+                        <Col span={7}>
+                            <Form.Item
+                                name="plnRounding"
+                                hasFeedback
+                                rules={
+                                    [
+                                        {
+                                            type: 'number',
+                                            min: -3,
+                                            max: 2,
+                                            message: ''
+                                        },
+                                    ]
+                                }
+                                initialValue={2}
+                            >
+                                <InputNumber onChange={(e) => {
+                                    setInputNumberValuePLN(e)
+                                }}/>
+                            </Form.Item>
+                        </Col>
+                        <Col span={3}>
+                            <Text
+                                type={"secondary"}>{
+                                switchPriceR(inputNumberValuePLN)
+                            }</Text>
                         </Col>
                     </Row>
                 </Form>
