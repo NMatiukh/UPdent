@@ -1,6 +1,6 @@
 import {
     CREATE_FIELD, CREATE_GROUP,
-    DELETE_FIELD, DELETE_GROUP, EDIT_FIELD, EDIT_GROUP, GET_FIELDS, GET_GROUPS,
+    DELETE_FIELD, DELETE_GROUP, EDIT_FIELD, EDIT_GROUP, GET_FIELDS, GET_GROUPS, GET_PRICE_DATA,
     GET_PRICE_LIST, PRICE_DATA, SET_PRICE_DETAILS, SET_PRICE_LIST
 } from "../types";
 import {arrayWithDelete} from "./someFunctions";
@@ -67,6 +67,11 @@ export const priceListReducer = (state = initialState, action) => {
                 priceList: state.priceList.map(value => value.id === action.payload.id ? action.payload : value)
             }
         case PRICE_DATA:
+            return {
+                ...state,
+                priceData: action.payload,
+            }
+        case GET_PRICE_DATA:
             return {
                 ...state,
                 priceData: action.payload,

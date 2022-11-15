@@ -12,7 +12,7 @@ import {ExclamationCircleOutlined, DeleteOutlined} from "@ant-design/icons";
 import {useDispatch, useSelector} from "react-redux";
 import {
     createField, createGroup, deleteField, deleteGroup,
-    editField, editGroup,
+    editField, editGroup, getPriceData,
     getPriceList, setPriceData, setPriceDetails, setPriceList
 } from "../redux/actions";
 import React, {useEffect, useRef, useState} from "react";
@@ -40,6 +40,7 @@ export default function PriceList() {
     const [priceForm] = Form.useForm();
     const dispatch = useDispatch();
     const priceList = useSelector(state => state.priceList.priceList)
+    const priceData = useSelector(state => state.priceList.priceData)
     const [isModalAddVisible, setIsModalAddVisible] = useState(false);
     const [isModalTransferFieldsVisible, setIsModalTransferFieldsVisible] = useState(false);
     const [isModalPrice, setIsModalPrice] = useState(false);
@@ -72,7 +73,9 @@ export default function PriceList() {
 
     useEffect(() => {
         dispatch(getPriceList())
-    }, [dispatch])
+        dispatch(getPriceData())
+        isModalPrice && priceForm.setFieldsValue(priceData)
+    }, [dispatch, isModalPrice])
 
     const showModal = (setIsModalVisible) => {
         setIsModalVisible(true);
@@ -122,15 +125,15 @@ export default function PriceList() {
     }
 
     const submitPriceForm = (activeForm, setIsModalVisible) => {
-        // activeForm.validateFields(['titleUA'])
+        // priceForm.validateFields(['EUR']) && priceForm.validateFields(['USD']) && priceForm.validateFields(['PLN'])
         //     .then(() => {
-        //         activeForm.submit();
+        //         priceForm.submit();
         //         handleOk(setIsModalVisible)
         //     })
         //     .catch(status => {
         //         console.error(status)
         //     })
-        activeForm.submit();
+        priceForm.submit();
         handleOk(setIsModalVisible)
     }
     const onFinish = (values) => {
@@ -269,7 +272,21 @@ export default function PriceList() {
             activeTitle && changeActiveBox()
         }} style={{margin: "0 10%", padding: "20px 0"}}>
             <Row justify={"space-between"}>
-                <Title>Прайс-лист</Title>
+                <Row style={{width: "30%"}} justify={"space-between"} align={"middle"}>
+                    <Title>Прайс-лист</Title>
+                    <Row justify={"space-between"} style={{width: "40%"}}>
+                        <Col>
+                            €: {priceData.EUR}
+                        </Col>
+                        <Col>
+                            $: {priceData.USD}
+                        </Col>
+                        <Col>
+                            zł: {priceData.PLN}
+                        </Col>
+                    </Row>
+                </Row>
+
                 <Button type={"primary"} onClick={() => {
                     setPriceListIsEditing(!priceListIsEditing)
                     dispatch(getPriceList());
@@ -992,7 +1009,6 @@ export default function PriceList() {
                                         },
                                     ]
                                 }
-                                initialValue={2}
                             >
                                 <InputNumber onChange={(e) => {
                                     setInputNumberValueUSD(e)
@@ -1029,7 +1045,6 @@ export default function PriceList() {
                             <Form.Item
                                 name="eurRounding"
                                 hasFeedback
-                                initialValue={2}
                                 rules={
                                     [
                                         {
@@ -1086,7 +1101,6 @@ export default function PriceList() {
                                         },
                                     ]
                                 }
-                                initialValue={2}
                             >
                                 <InputNumber onChange={(e) => {
                                     setInputNumberValuePLN(e)

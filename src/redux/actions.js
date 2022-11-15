@@ -1,7 +1,7 @@
 import {
     CREATE_FIELD, CREATE_GROUP,
     DELETE_FIELD, DELETE_GROUP, EDIT_FIELD,
-    EDIT_GROUP, GET_PRICE_LIST, PRICE_DATA, SET_PRICE_DETAILS, SET_PRICE_LIST
+    EDIT_GROUP, GET_PRICE_DATA, GET_PRICE_LIST, PRICE_DATA, SET_PRICE_DETAILS, SET_PRICE_LIST
 } from "./types";
 import {message} from "antd";
 import axios from "axios";
@@ -73,6 +73,24 @@ export function setPriceData(data) {
             .catch((error) => {
                 message.error('Помика! Не вдалось створити!');
                 console.error(error)
+            })
+    }
+}
+export function getPriceData(){
+    return async dispatch => {
+        axios
+            .get(URL + "/currencies/current_rate")
+            .then(response => {
+                dispatch({
+                    type: GET_PRICE_DATA, payload: {
+                        "EUR": parseFloat(response.data.data.attributes.euro),
+                        "eurRounding":parseFloat(response.data.data.attributes.euro_r),
+                        "USD": parseFloat(response.data.data.attributes.dollar),
+                        "usdRounding":parseFloat(response.data.data.attributes.dollar_r),
+                        "PLN": parseFloat(response.data.data.attributes.zloty),
+                        "plnRounding":parseFloat(response.data.data.attributes.zloty_r),
+                    }
+                })
             })
     }
 }
