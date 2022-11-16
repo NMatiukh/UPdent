@@ -34,14 +34,14 @@ export function getPriceList() {
                                     "subtitleEN": detail.title_en,
                                     "subtitlePL": detail.title_pl,
                                     "sectionId": parseInt(detail.price_section_id),
-                                    "price": parseInt(detail.price_ua),
-                                    "pricePL": parseInt(detail.price_pl),
-                                    "priceEN": parseInt(detail.price_en),
-                                    "priceUS": parseInt(detail.price_us),
-                                    "price1": parseInt(detail.price_ua1),
-                                    "pricePL1": parseInt(detail.price_pl1),
-                                    "priceEN1": parseInt(detail.price_en1),
-                                    "priceUS1": parseInt(detail.price_us1),
+                                    "price": parseFloat(detail.price_ua),
+                                    "pricePL": parseFloat(detail.price_pl),
+                                    "priceEN": parseFloat(detail.price_en),
+                                    "priceUS": parseFloat(detail.price_dol),
+                                    "price1": parseFloat(detail.price_ua1),
+                                    "pricePL1": parseFloat(detail.price_pl1),
+                                    "priceEN1": parseFloat(detail.price_en1),
+                                    "priceUS1": parseFloat(detail.price_dol1),
                                     "priority": parseInt(detail.priority)
                                 }
                             })
@@ -110,7 +110,8 @@ export function setPriceList(arr) {
 }
 
 // FIELDS
-export function createField(field, groupID) {
+export function createField(field, groupID, priority) {
+    console.log(priority)
     return async dispatch => {
         axios
             .request({
@@ -123,11 +124,11 @@ export function createField(field, groupID) {
                     "price_ua": field.price,
                     "price_ua1": field.price1,
                     "price_section_id": groupID,
-                    "priority": field.priority
+                    "priority": priority
                 }
             })
             .then(response => {
-                dispatch({type: CREATE_FIELD, payload: {...field, ...{"groupID": groupID}}});
+                dispatch({type: CREATE_FIELD, payload: {...field, ...{"groupID": groupID, "priority": priority}}});
                 dispatch(getPriceList())
             })
             .catch((error) => {
@@ -138,7 +139,6 @@ export function createField(field, groupID) {
 }
 
 export function editField(field, groupID) {
-    console.log(field)
     return async dispatch => {
         axios
             .request({

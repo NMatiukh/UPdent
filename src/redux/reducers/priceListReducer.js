@@ -69,7 +69,7 @@ export const priceListReducer = (state = initialState, action) => {
         case PRICE_DATA:
             return {
                 ...state,
-                priceData: action.payload,
+                priceData: action.payload
             }
         case GET_PRICE_DATA:
             return {

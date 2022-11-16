@@ -15,7 +15,7 @@ import {
     editField, editGroup, getPriceData,
     getPriceList, setPriceData, setPriceDetails, setPriceList
 } from "../redux/actions";
-import React, {useEffect, useRef, useState} from "react";
+import React, {useEffect, useLayoutEffect, useRef, useState} from "react";
 import TextArea from "antd/es/input/TextArea";
 import InfiniteScroll from 'react-infinite-scroll-component';
 import {message} from "antd";
@@ -75,7 +75,8 @@ export default function PriceList() {
         dispatch(getPriceList())
         dispatch(getPriceData())
         isModalPrice && priceForm.setFieldsValue(priceData)
-    }, [dispatch, isModalPrice])
+        !priceListIsEditing && form.setFieldsValue(priceList.filter(item => item.id === activeTitle)[0])
+    }, [dispatch, isModalPrice, priceListIsEditing])
 
     const showModal = (setIsModalVisible) => {
         setIsModalVisible(true);
@@ -135,15 +136,16 @@ export default function PriceList() {
         //     })
         priceForm.submit();
         handleOk(setIsModalVisible)
+
     }
     const onFinish = (values) => {
+        let obj = priceList.filter(item => item.id === activeTitle)[0];
         dispatch(editGroup(values, activeTitle))
-
         values.details.map((item) => {
             item.id ?
                 dispatch(editField(item, activeTitle))
                 :
-                dispatch(createField(item, activeTitle));
+                dispatch(createField(item, activeTitle, obj.details.length));
         })
         message.success(`Виконано!`);
     };
@@ -287,12 +289,17 @@ export default function PriceList() {
                     </Row>
                 </Row>
 
-                <Button type={"primary"} onClick={() => {
-                    setPriceListIsEditing(!priceListIsEditing)
-                    dispatch(getPriceList());
-                }}>
-                    {priceListIsEditing ? "Переглядати" : "Редагувати"}
-                </Button>
+                <Row justify={"space-between"} style={{width: "15%"}}>
+                    <Button type={"primary"} onClick={() => {
+                        setPriceListIsEditing(!priceListIsEditing)
+                    }}>
+                        {priceListIsEditing ? "Переглядати" : "Редагувати"}
+                    </Button>
+                    <Button>
+                        <a href="https://updent.com.ua/admin">Вихід в адмін</a>
+                    </Button>
+                </Row>
+                
             </Row>
             <Row justify={"space-between"}>
                 <Col
@@ -731,10 +738,6 @@ export default function PriceList() {
                                                                                             danger
                                                                                             type={"primary"}
                                                                                             onClick={() => showPromiseConfirm(() => {
-                                                                                                console.log({
-                                                                                                    "from": form.getFieldsValue().details,
-                                                                                                    "fields": fields
-                                                                                                })
                                                                                                 dispatch(deleteField(form.getFieldsValue().details[field.name], activeTitle))
                                                                                                 remove(field.name)
                                                                                             }, 'поле')}
@@ -947,6 +950,9 @@ export default function PriceList() {
                 destroyOnClose={true}
                 visible={isModalPrice}
                 width={600}
+                afterClose={() => {
+                    dispatch(getPriceList())
+                }}
                 footer={
                     <Button
                         key={"addOk"}
