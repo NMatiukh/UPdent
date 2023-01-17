@@ -15,7 +15,7 @@ import {
     editField, editGroup, getPriceData,
     getPriceList, setPriceData, setPriceDetails, setPriceList
 } from "../redux/actions";
-import React, {useEffect, useLayoutEffect, useRef, useState} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import TextArea from "antd/es/input/TextArea";
 import InfiniteScroll from 'react-infinite-scroll-component';
 import {message} from "antd";
@@ -50,6 +50,9 @@ export default function PriceList() {
     const [activeBox, setActiveBox] = useState(false)
     const [priceListIsEditing, setPriceListIsEditing] = useState(false);
     const [oneTransferField, setOneTransferField] = useState(0);
+
+    const testRef = React.useRef(null);
+
 
     const validators = [
         {
@@ -289,17 +292,17 @@ export default function PriceList() {
                     </Row>
                 </Row>
 
-                <Row justify={"space-between"} style={{width: "15%"}}>
-                    <Button type={"primary"} onClick={() => {
+                <Row justify={"space-between"} style={{minWidth: "17%"}}>
+                    <Button onClick={() => {
                         setPriceListIsEditing(!priceListIsEditing)
                     }}>
                         {priceListIsEditing ? "Переглядати" : "Редагувати"}
                     </Button>
-                    <Button>
+                    <Button danger>
                         <a href="https://updent.com.ua/admin">Вихід в адмін</a>
                     </Button>
                 </Row>
-                
+
             </Row>
             <Row justify={"space-between"}>
                 <Col
@@ -390,7 +393,7 @@ export default function PriceList() {
                                                         ]
                                                     }
                                                 >
-                                                    <TextArea maxLength={71}
+                                                    <TextArea maxLength={100}
                                                               autoSize={{minRows: 1, maxRows: 1}}
                                                               style={{
                                                                   background: "white",
@@ -404,7 +407,7 @@ export default function PriceList() {
                                                     label={"en"}
                                                     name={"titleEN"}
                                                 >
-                                                    <TextArea maxLength={71}
+                                                    <TextArea maxLength={100}
                                                               autoSize={{minRows: 1, maxRows: 1}}
                                                               style={{
                                                                   background: "white",
@@ -418,7 +421,7 @@ export default function PriceList() {
                                                     label={"pl"}
                                                     name={"titlePL"}
                                                 >
-                                                    <TextArea maxLength={71}
+                                                    <TextArea maxLength={100}
                                                               autoSize={{minRows: 1, maxRows: 1}}
                                                               style={{
                                                                   background: "white",
@@ -489,12 +492,12 @@ export default function PriceList() {
                                                                          onDragEnd={handleSort}
                                                                          onDragOver={(e) => e.preventDefault()}
                                                                          id={priceListIsEditing ? "field" : ''}
+                                                                         ref={testRef}
                                                                     >
                                                                         <Col span={mainColSpanValues.checkbox}>
                                                                             {
                                                                                 priceListIsEditing &&
                                                                                 <Form.Item
-
                                                                                     name={[index, "status"]}
                                                                                     valuePropName="checked"
                                                                                 >
@@ -502,7 +505,8 @@ export default function PriceList() {
                                                                                 </Form.Item>
                                                                             }
                                                                         </Col>
-                                                                        <Col span={mainColSpanValues.operation}>
+                                                                        <Col span={mainColSpanValues.operation}
+                                                                        >
                                                                             <Form.Item
                                                                                 label={"ua"}
                                                                                 labelCol={{span: 1}}
@@ -517,15 +521,17 @@ export default function PriceList() {
                                                                                     ]
                                                                                 }
                                                                             >
-                                                                                <TextArea maxLength={71}
-                                                                                          autoSize={{
-                                                                                              minRows: 1,
-                                                                                              maxRows: 1
-                                                                                          }}
-                                                                                          style={{
-                                                                                              background: "white",
-                                                                                              color: "black"
-                                                                                          }}
+                                                                                <TextArea
+                                                                                    maxLength={100}
+                                                                                    autoSize={{
+                                                                                        minRows: 1,
+                                                                                        maxRows: 1
+                                                                                    }}
+                                                                                    style={{
+                                                                                        background: "white",
+                                                                                        color: "black"
+                                                                                    }}
+                                                                                    onMouseDown={e=>{}}
                                                                                 />
                                                                             </Form.Item>
                                                                             <Form.Item
@@ -534,7 +540,7 @@ export default function PriceList() {
                                                                                 labelCol={{span: 1}}
                                                                                 style={{marginBottom: 5}}
                                                                             >
-                                                                                <TextArea maxLength={71}
+                                                                                <TextArea maxLength={100}
                                                                                           autoSize={{
                                                                                               minRows: 1,
                                                                                               maxRows: 1
@@ -551,7 +557,7 @@ export default function PriceList() {
                                                                                 name={[index, "subtitlePL"]}
                                                                                 style={{marginBottom: 5}}
                                                                             >
-                                                                                <TextArea maxLength={71}
+                                                                                <TextArea maxLength={100}
                                                                                           autoSize={{
                                                                                               minRows: 1,
                                                                                               maxRows: 1
